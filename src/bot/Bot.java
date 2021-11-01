@@ -1,12 +1,21 @@
 package bot;
 
 import lejos.hardware.*;
+
 import lejos.hardware.lcd.*;
 import lejos.hardware.motor.*;
 import lejos.hardware.port.*;
+import lejos.hardware.sensor.*;
 import lejos.robotics.navigation.DifferentialPilot;
 
+import bot.men.MainMenu;
+import bot.sen.SensorThread;
+
 public class Bot {
+
+	public static final float SAGITTAL_LENGTH = 1;
+	public static final float CORONAL_LENGTH = 1;
+	public static final float AXIAL_LENGTH = 1;
 
 	public EV3LargeRegulatedMotor lMotor;
 	public EV3LargeRegulatedMotor rMotor;
@@ -28,7 +37,7 @@ public class Bot {
 		colorS = new EV3ColorSensor(SensorPort.S1);
 		touchS = new EV3TouchSensor(SensorPort.S2);
 		ultraS = new EV3UltrasonicSensor(SensorPort.S3);
-		gyroS = new EV3GyroSensor(SensorPort.S4)
+		gyroS = new EV3GyroSensor(SensorPort.S4);
 
 		this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
 		this.mainMenu = new MainMenu();

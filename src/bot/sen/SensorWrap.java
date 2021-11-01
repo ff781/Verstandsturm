@@ -1,3 +1,7 @@
+package bot.sen;
+
+import lejos.hardware.sensor.*;
+
 
 public class SensorWrap {
 
@@ -9,7 +13,7 @@ public class SensorWrap {
     this.samples = new float[this.mode.sampleSize()];
   }
 
-  public <MODE_TYPE> SensorWrap(BaseSensor sensor, MODE_TYPE mode){
+  public SensorWrap(BaseSensor sensor, String mode){
     this(sensor.getMode(mode));
   }
 
