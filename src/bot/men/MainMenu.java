@@ -3,7 +3,6 @@ import java.util.*;
 
 import bot.Bot;
 import lejos.hardware.*;
-import lejos.hardware.lcd.*;
 import lejos.utility.*;
 
 public class MainMenu extends TextMenu {
@@ -17,7 +16,7 @@ public class MainMenu extends TextMenu {
 
 		while (Button.ESCAPE.isUp()) {
 
-			BrickScreen.clearScreen();
+			Screen.clear();
 
 			switch (Task.values()[this.select()]) {
         case Task.LINE: {
