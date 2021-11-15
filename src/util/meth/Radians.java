@@ -11,7 +11,7 @@ public class Radians {
   }
 
   public float degrees(){
-    return (this.rad / Math.PI) * 720;
+    return (float)((this.rad / Math.PI)*720);
   }
 
 }
