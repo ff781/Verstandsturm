@@ -1,14 +1,14 @@
 package bot.sen;
 
+import lejos.robotics.*;
 import lejos.hardware.sensor.*;
-
 
 public class SensorWrap {
 
-  public SensorMode mode;
+  public SampleProvider mode;
   public float[] samples;
 
-  public SensorWrap(SensorMode mode){
+  public <T> SensorWrap(SampleProvider mode){
     this.mode = mode;
     this.samples = new float[this.mode.sampleSize()];
   }

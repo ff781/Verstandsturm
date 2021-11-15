@@ -1,11 +1,15 @@
+package bot.sen;
+
+import lejos.hardware.sensor.*; 
+
 public class SensorThread implements Runnable{
 
-  public Sensor gs;
+  public EV3GyroSensor gs;
 
-  public SensorWrap csw;
-  public SensorWrap tsw;
-  public SensorWrap usw;
-  public SensorWrap gsw;
+  public SensorWrap csm;
+  public SensorWrap tsm;
+  public SensorWrap usm;
+  public SensorWrap gsm;
 
   public SensorThread(EV3ColorSensor cs, EV3TouchSensor ts, EV3UltrasonicSensor us, EV3GyroSensor gs){
     this.gs = gs;
@@ -33,11 +37,11 @@ public class SensorThread implements Runnable{
   }
 
   public float getTouch(){
-    return this.tsw.getSample();
+    return this.tsm.getSample();
   }
 
   public float[] getRGB(){
-    return this.csw.getSamples();
+	return this.csm.getSamples();
   }
 
   public float getDistance(){
