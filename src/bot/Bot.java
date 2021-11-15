@@ -17,6 +17,8 @@ public class Bot {
 	public static final float CORONAL_LENGTH = 1;
 	public static final float AXIAL_LENGTH = 1;
 
+	public static final float WHEEL_DIAMETER = 1;
+
 	public EV3LargeRegulatedMotor lMotor;
 	public EV3LargeRegulatedMotor rMotor;
 	public EV3MediumRegulatedMotor rotor;
@@ -29,17 +31,24 @@ public class Bot {
 
 	public MainMenu mainMenu;
 
+	public Driver driver;
+
 	public Bot() {
 		this.lMotor = new EV3LargeRegulatedMotor(MotorPort.A);
 		this.rMotor = new EV3LargeRegulatedMotor(MotorPort.B);
 		this.rotor = new EV3MediumRegulatedMotor(MotorPort.C);
 
-		colorS = new EV3ColorSensor(SensorPort.S1);
-		touchS = new EV3TouchSensor(SensorPort.S2);
-		ultraS = new EV3UltrasonicSensor(SensorPort.S3);
-		gyroS = new EV3GyroSensor(SensorPort.S4);
+		try{
+			colorS = new EV3ColorSensor(SensorPort.S1);
+			touchS = new EV3TouchSensor(SensorPort.S2);
+			gyroS = new EV3GyroSensor(SensorPort.S3);
+			ultraS = new EV3UltrasonicSensor(SensorPort.S4);
 
-		this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
+			this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
+		}catch(Exception e){
+			//
+		}
+
 		this.mainMenu = new MainMenu();
 		this.driver = new Driver(this);
 

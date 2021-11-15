@@ -11,7 +11,7 @@ public class Screen {
   }
 
   public static void clear(){
-    LCD.clear()
+    LCD.clear();
     x = 0;
     y = 0;
   }

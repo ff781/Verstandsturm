@@ -8,8 +8,18 @@ import lejos.utility.*;
 public class MainMenu extends TextMenu {
 
   public MainMenu(){
-    super(Arrays.stream(Task.values()).map(Task::getDesc).toArray(String[]::new),0,"what you gonna do rolling down in the deep");
+    super(superParam1(),1,"what you gonna do rolling down in the deep");
   }
+
+  public static String[] superParam1 () {
+	  Task[]v = Task.values();
+	  String[] r = new String[v.length];
+	  for(int i=0;i<v.length;i++) {
+		r[i] = v[i].getDesc();
+	  }
+	  return r;
+  }
+  
 
   public void open(Bot bot){
     Sound.beepSequenceUp();
@@ -19,28 +29,31 @@ public class MainMenu extends TextMenu {
 			Screen.clear();
 
 			switch (Task.values()[this.select()]) {
-        case Task.LINE: {
+		        case LINE: {
 
-        }
-        break;
-        case Task.PUSH: {
-
-
-        }
-        break;
-        case Task.RUNWAY: {
+		        }
+		        break;
+		        case PUSH: {
 
 
-        }
-        break;
-        case Task.LINE: {
+		        }
+		        break;
+		        case RUNWAY: {
 
 
-        }
-        break;
+		        }
+		        break;
+		        case COLOR: {
+
+
+		        }
+		        break;
 			}
-
-			Thread.sleep(20);
+			try {
+				Thread.sleep(20);
+			}catch(Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
   }
 
