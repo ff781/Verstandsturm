@@ -100,6 +100,7 @@ public class MainMenu extends TextMenu {
 						}else if(Button.DOWN.isDown()) {
 							bot.driver.drive(90, 90, -1);
 						}
+						break;
 					case 1:
 						if(Button.LEFT.isDown()) {
 							bot.driver.turnUS(90, 90);
@@ -108,6 +109,7 @@ public class MainMenu extends TextMenu {
 						}else if(Button.UP.isDown()) {
 						}else if(Button.DOWN.isDown()) {
 						}
+						break;
 				}
 				
 			}

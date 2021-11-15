@@ -6,12 +6,13 @@ public class Driver {
 
 	public static final boolean BLOCKING_DEFAULT = true;
 
-	public static final float turnDegFactorL = 3;
-	public static final float turnDegFactorR = 3;
+	public static final float turnDegFactorL = 5.69f;
     public static final float turnSpeedFactorL = 3;
+	public static final float turnDegFactorR = 5.69f;
     public static final float turnSpeedFactorR = 3;
-    public static final float turnSpeedFactorUSM = 1;
-    public static final float driveFactor = 1;
+	public static final float turnDegFactorUSM = 3;
+    public static final float turnSpeedFactorUSM = 3;
+    public static final float driveFactor = 0.3515f;
 
 	Bot bot;
 
@@ -59,13 +60,13 @@ public class Driver {
 			};
 		}
 	}
-	public void driveUS(float distance, float speed, int direction){
-		  this.drive(distance, speed, direction, BLOCKING_DEFAULT);
+	public void turnUS(float deg, float speed){
+		this.turn(deg, speed, BLOCKING_DEFAULT);
 	}
 
-	public void turnUS(float distance, float speed, boolean blocking){
+	public void turnUS(float deg, float speed, boolean blocking){
 		Thread[]threads = new Thread[]{
-				new RotateThread(this.bot.rotor, distance*turnSpeedFactorUSM, speed*turnSpeedFactorUSM),
+				new RotateThread(this.bot.rotor, deg*turnDegFactorUSM, speed*turnSpeedFactorUSM),
 		};
 		for(Thread t:threads)t.start();
 		if(blocking) {
