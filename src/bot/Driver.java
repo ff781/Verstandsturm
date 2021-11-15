@@ -38,6 +38,14 @@ public class Driver {
 			};
 		}
 	}
+	
+	public void directionChange(float y) {
+		int lSpeed = this.bot.lMotor.getSpeed();
+		int rSpeed = this.bot.rMotor.getSpeed();
+		
+		this.bot.lMotor.setSpeed(lSpeed + y);
+		this.bot.rMotor.setSpeed(rSpeed - y);
+	}
 
 	public void drive(float distance, float speed, int direction){
 	  this.drive(distance, speed, direction, BLOCKING_DEFAULT);
