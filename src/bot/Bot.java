@@ -46,7 +46,7 @@ public class Bot {
 
 			this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
 		}catch(Exception e){
-			//
+			System.out.println("Exception in Bot: Sensor Init");
 		}
 
 		this.mainMenu = new MainMenu();
