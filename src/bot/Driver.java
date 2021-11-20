@@ -47,6 +47,14 @@ public class Driver {
 			};
 		}
 	}
+	
+	public void directionChange(float y) {
+		int lSpeed = this.bot.lMotor.getSpeed();
+		int rSpeed = this.bot.rMotor.getSpeed();
+		
+		this.bot.lMotor.setSpeed(lSpeed + y);
+		this.bot.rMotor.setSpeed(rSpeed - y);
+	}
 
 	/*
 	 * drives forward or backward in a straight line
