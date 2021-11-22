@@ -1,6 +1,7 @@
 package teaset;
 
 import lejos.hardware.Button;
+
 import bot.*;
 import bot.men.*;
 
@@ -10,6 +11,7 @@ public class Main {
 		Bot bot = new Bot();
 
 		MainMenu mainMenu = new MainMenu();
+		
 		mainMenu.open(bot);
 	}
 }

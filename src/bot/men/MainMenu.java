@@ -26,19 +26,15 @@ public class MainMenu extends TextMenu {
   public void open(Bot bot){
     Sound.beepSequenceUp();
 
-		while (Button.ESCAPE.isUp()) {
-			
+		while (!Screen.wasPressed(Button.ID_ESCAPE)) {
+						
 			Screen.clear();
 
 			int select = this.select();
 			
 			if(select >= 0 && select < Task.values.length)
 			(Task.values[select]).exec(bot);
-			try {
-				Thread.sleep(20);
-			}catch(Exception e) {
-				throw new RuntimeException(e);
-			}
+			Screen.sleep(20);
 		}
   }
 
