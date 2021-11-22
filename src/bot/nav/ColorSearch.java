@@ -25,6 +25,8 @@ public class ColorSearch {
 	 */
 	public void search() {
 		
+		int cnt = 0;
+		
 		float[] rgbBack = this.bot.sensors.getRGB();
 		rBack = rgbBack[0];
 		gBack = rgbBack[1];
@@ -32,20 +34,21 @@ public class ColorSearch {
 		
 		bot.driver.forward();;
 		
-		while(Button.LEFT.isUp()) {
+		while(Button.ESCAPE.isUp()) {
 	
 			
 			//recognize different color
 			if(checkColor(bot.sensors)) {
 				if(!foundFirst) {
-				//first color found
-				this.bot.driver.stop();
-				Sound.beepSequenceUp();
-				float[] rgb = this.bot.sensors.getRGB();
-				rFirst = rgb[0];
-				gFirst = rgb[1];
-				bFirst = rgb[2];
-				foundFirst = true;
+					//first color found
+					this.bot.driver.stop();
+					Sound.beepSequenceUp();
+					float[] rgb = this.bot.sensors.getRGB();
+					rFirst = rgb[0];
+					gFirst = rgb[1];
+					bFirst = rgb[2];
+					foundFirst = true;
+					this.bot.driver.forward();
 				}
 				else {
 					//second color found
@@ -57,10 +60,23 @@ public class ColorSearch {
 			
 			//Robot touches wall
 			if(checkTouch(bot.sensors)) {
-				this.bot.driver.turnRotor(90f, 1f);;
-				this.bot.driver.forward();;
+				//Check sides first
+				if (cnt <= 3) {
+					this.bot.driver.turnRotor(90f, 1f);;
+					this.bot.driver.forward();
+					cnt++;
+				}
+				//then start checking inside the square
+				else {
+					this.bot.driver.turnRotor(90f, 1f);
+					this.bot.driver.drive(2, 2, 1);
+					this.bot.driver.turnRotor(90f, 1f);
+					this.bot.driver.forward();
+				}
 			}
+		
 		}
+		bot.driver.stop();
 	}
 	
 	/**
@@ -73,12 +89,12 @@ public class ColorSearch {
 		g = rgb[1];
 		b = rgb[2];
 		
-		if((r - rBack) + (g- gBack) + (b - bBack) > 15 ) {
+		if((r - rBack) + (g- gBack) + (b - bBack) > 0.05 ) {
 			if(!foundFirst) {
 				return true;
 			}
 			else {
-				if((r - rFirst) + (g- gFirst) + (b - bFirst) > 15 ) {
+				if((r - rFirst) + (g- gFirst) + (b - bFirst) > 0.05 ) {
 					return true;
 				}
 			}
