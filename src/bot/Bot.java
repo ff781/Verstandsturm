@@ -65,7 +65,7 @@ public class Bot {
 		s.setDaemon(true);
 		s.start();
 		
-		Screen.startButtonThread()
+		Screen.startButtonThread();
 	}
 
 }

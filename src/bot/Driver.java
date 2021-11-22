@@ -105,6 +105,16 @@ public class Driver {
 			};
 		}
 	}
+	
+	public void forward() {
+		bot.lMotor.forward();
+		bot.rMotor.forward();
+	}
+	
+	public void stop() {
+		bot.lMotor.stop();
+		bot.rMotor.stop();
+	}
 
 	static class RotateThread extends Thread {
 
