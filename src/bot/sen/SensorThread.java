@@ -24,6 +24,12 @@ public class SensorThread implements Runnable{
 
     this.resetGs();
   }
+  
+  public void start() {
+	  Thread t = new Thread(this);
+	  t.setDaemon(true);
+	  t.start();
+  }
 
   @Override
   public void run(){

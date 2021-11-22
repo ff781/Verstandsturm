@@ -73,9 +73,7 @@ public class Bot {
 		this.mainMenu = new MainMenu();
 		this.driver = new Driver(this);
 
-		Thread s = new Thread(this.sensors);
-		s.setDaemon(true);
-		s.start();
+		this.sensors.start();
 		
 		Screen.startButtonThread();
 	}

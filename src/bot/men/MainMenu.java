@@ -115,9 +115,10 @@ public class MainMenu extends TextMenu {
 			@Override
 			void exec(Bot bot) {
 				Screen.clear();
-				Screen.prints("Testing, LRUP=CTGU!");
+				Screen.print("Testing, LRUP=CTGU!");
 				int mode = -1;
 				while(!Screen.wasPressed(Button.ID_ESCAPE)) {
+					Screen.sleep(250);
 					if(Button.LEFT.isDown()) {
 						mode = 0;
 					}else if(Button.RIGHT.isDown()) {
@@ -131,19 +132,19 @@ public class MainMenu extends TextMenu {
 					switch(mode) {
 						case 0:
 							
-							Screen.prints(String.format("RGB: %s %n",Arrays.toString(bot.sensors.getRGB())));
+							Screen.print(String.format("RGB: %s %n",Arrays.toString(bot.sensors.getRGB())));
 							break;
 						case 1:
-							Screen.prints(String.format("I am being touched %s%n", bot.sensors.getTouch()));
+							Screen.print(String.format("I am being touched %s%n", bot.sensors.getTouch()));
 							break;
 						case 2:
-							Screen.prints(String.format("Gyros%n current angle%s%n current angular speed%s%n", bot.sensors.getAngel(), bot.sensors.getAngelV()));
+							Screen.print(String.format("Gyros%n current angle%s%n current angular speed%s%n", bot.sensors.getAngel(), bot.sensors.getAngelV()));
 							break;
 						case 3:
-							Screen.prints(String.format("Distance: %s%n", bot.sensors.getDistance()));
+							Screen.print(String.format("Distance: %s%n", bot.sensors.getDistance()));
 							break;
 						case -1:
-							Screen.prints("No sensor selected");
+							Screen.print("No sensor selected");
 					}
 				}
 			}},
