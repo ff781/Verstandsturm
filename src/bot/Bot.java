@@ -11,7 +11,7 @@ import lejos.robotics.navigation.DifferentialPilot;
 
 import java.util.*;
 
-import bot.men.MainMenu;
+import bot.men.*;
 import bot.sen.SensorThread;
 import bot.por.PortUtil;
 
@@ -61,7 +61,11 @@ public class Bot {
 		this.mainMenu = new MainMenu();
 		this.driver = new Driver(this);
 
-		new Thread(this.sensors).start();
+		Thread s = new Thread(this.sensors);
+		s.setDaemon(true);
+		s.start();
+		
+		Screen.startButtonThread()
 	}
 
 }
