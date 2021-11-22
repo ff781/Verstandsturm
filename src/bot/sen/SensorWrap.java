@@ -7,6 +7,10 @@ public class SensorWrap {
 
   public SampleProvider mode;
   public float[] samples;
+  
+  protected SensorWrap() {
+	  
+  }
 
   public <T> SensorWrap(SampleProvider mode){
     this.mode = mode;
@@ -15,6 +19,10 @@ public class SensorWrap {
 
   public SensorWrap(BaseSensor sensor, String mode){
     this(sensor.getMode(mode));
+  }
+  
+  public static SensorWrap empty() {
+	  return new EmptySensorWrap();
   }
 
   public void get(){
@@ -27,6 +35,14 @@ public class SensorWrap {
 
   public float[] getSamples(){
     return samples;
+  }
+  
+  public boolean isActive() {
+	  return true;
+  }
+  
+  public boolean isIgnorant() {
+	  return false;
   }
 
 }
