@@ -8,19 +8,21 @@ import lejos.hardware.lcd.*;
 public class Screen {
 
   private static int x, y;
-  private static Map<Integer, Boolean> wasPressed = new HashMap<>();
+  public static Map<Integer, Boolean> wasPressed = new HashMap<>();
   static{
 	  for(int i : new int[] {Button.ID_DOWN,Button.ID_LEFT,Button.ID_RIGHT,Button.ID_UP,Button.ID_ENTER,Button.ID_ESCAPE}) {
-		wasPressed.put(i, false);  
+		wasPressed.put(i, false);
 	  }
   }
   
   public static void startButtonThread() {
 	  Thread t = new Thread(new Runnable() {
 		  public void run() {
-			  for(int i : new int[] {Button.ID_DOWN,Button.ID_LEFT,Button.ID_RIGHT,Button.ID_UP,Button.ID_ENTER,Button.ID_ESCAPE}) {
-				int a = Button.waitForAnyPress();
-				wasPressed.put(i, (a & i)!=0);
+			  while(true) {
+				  int a = Button.waitForAnyPress();
+				  for(int i : new int[] {Button.ID_DOWN,Button.ID_LEFT,Button.ID_RIGHT,Button.ID_UP,Button.ID_ENTER,Button.ID_ESCAPE}) {
+					wasPressed.put(i, (a & i)!=0);
+				  }
 			  }
 		  }
 	  });
@@ -37,8 +39,11 @@ public class Screen {
   }
   
   public static void prints(String s) {
+	LCD.drawString(s, x, y);
+  }
+  
+  public static void sout_println(String s) {
 	  System.out.println(s);
-	//LCD.drawString(s, x, y);
   }
   
   public static void sleep(long millis) {
@@ -62,5 +67,10 @@ public class Screen {
     LCD.clear();
     x = 0;
     y = 0;
+  }
+  
+  public static void sout_clear() {
+	  for(int i=0;i<8;i++)
+		  System.out.println();
   }
 }
