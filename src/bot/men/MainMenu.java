@@ -6,7 +6,6 @@ import bot.Bot;
 import bot.nav.SLine;
 import lejos.utility.*;
 import lejos.hardware.*;
-import lejos.hardware.lcd.*;
 
 public class MainMenu extends TextMenu {
 
@@ -29,7 +28,7 @@ public class MainMenu extends TextMenu {
 
 		while (Button.ESCAPE.isUp()) {
 			
-			//LCD.clear();
+			Screen.clear();
 
 			int select = this.select();
 			
@@ -82,10 +81,10 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			LCD.clear();
-			System.out.println("Testing, use the buttons to maneuver!");
+			Screen.clear();
+			Screen.prints("Testing, use the buttons to maneuver!");
 			int mode = 0;
-			while(Button.ESCAPE.isUp()) {
+			while(!Screen.wasPressed(Button.ID_ESCAPE)) {
 				if (Button.ENTER.isDown()) {
 					mode = (mode + 1)%2;
 				}
@@ -119,11 +118,10 @@ public class MainMenu extends TextMenu {
 
 			@Override
 			void exec(Bot bot) {
-				LCD.clear();
-				System.out.println("Testing, LRUP=CTGU!");
+				Screen.clear();
+				Screen.prints("Testing, LRUP=CTGU!");
 				int mode = -1;
-				while(Button.ESCAPE.isUp()) {
-					if(Button.ENTER.isDown()) mode = -1;
+				while(!Screen.wasPressed(Button.ID_ESCAPE)) {
 					if(Button.LEFT.isDown()) {
 						mode = 0;
 					}else if(Button.RIGHT.isDown()) {
@@ -133,27 +131,25 @@ public class MainMenu extends TextMenu {
 					}else if(Button.DOWN.isDown()) {
 						mode = 3;
 					}
-					LCD.clear();
+					Screen.clear();
 					switch(mode) {
 						case 0:
 							
-							System.out.printf("RGB: %s %n",Arrays.toString(bot.sensors.getRGB()));
+							Screen.prints(String.format("RGB: %s %n",Arrays.toString(bot.sensors.getRGB())));
 							break;
 						case 1:
-							
-							System.out.printf("I am being touched %s%n", bot.sensors.getTouch());
+							Screen.prints(String.format("I am being touched %s%n", bot.sensors.getTouch()));
 							break;
 						case 2:
-							System.out.printf("Gyros%n current angle%s%n current angular speed%s%n", bot.sensors.getAngel(), bot.sensors.getAngelV());
+							Screen.prints(String.format("Gyros%n current angle%s%n current angular speed%s%n", bot.sensors.getAngel(), bot.sensors.getAngelV()));
 							break;
 						case 3:
-							System.out.printf("Distance: %s%n", bot.sensors.getDistance());
+							Screen.prints(String.format("Distance: %s%n", bot.sensors.getDistance()));
 							break;
 						case -1:
-							System.out.println("No sensor selected");
+							Screen.prints("No sensor selected");
 					}
 				}
-				
 			}},
     ;
 	static Task[]values=values();
