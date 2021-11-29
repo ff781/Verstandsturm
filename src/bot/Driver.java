@@ -107,8 +107,8 @@ public class Driver {
 	}
 	
 	public void forward() {
-		bot.lMotor.setSpeed(720);
-		bot.rMotor.setSpeed(720);
+		bot.lMotor.setSpeed(500);
+		bot.rMotor.setSpeed(500);
 		bot.lMotor.forward();
 		bot.rMotor.forward();
 	}
