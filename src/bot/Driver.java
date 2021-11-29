@@ -113,6 +113,13 @@ public class Driver {
 		bot.rMotor.forward();
 	}
 	
+	public void forward(int lSpeed, int rSpeed) {
+		bot.lMotor.setSpeed(lSpeed);
+		bot.rMotor.setSpeed(rSpeed);
+		bot.lMotor.forward();
+		bot.rMotor.forward();
+	}
+	
 	public void stop() {
 		bot.lMotor.stop();
 		bot.rMotor.stop();
