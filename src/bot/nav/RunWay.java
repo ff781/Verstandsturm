@@ -84,10 +84,10 @@ public class RunWay {
 			
 			// check if Robot touches wall on left side
 			if (checkTouch(bot.sensors)) {
-				this.bot.driver.drive(1f, 2f, -1);
-				this.bot.driver.turn(90f, 2f, false);
-				this.bot.driver.drive(1f, 2f, -1);
-				this.bot.driver.turn(-90f, 2f, false);
+				this.bot.driver.drive(4f, 2f, -1);
+				this.bot.driver.turn(-90f, 2f, true);
+				this.bot.driver.drive(13f, 2f, 1);
+				this.bot.driver.turn(90f, 2f, true);
 				this.bot.driver.forward();
 			}
 		}
@@ -115,11 +115,14 @@ public class RunWay {
 	}
 	
 	private void driveAcross() {
-		bot.driver.drive(1f, 2f, 1);
-		bot.driver.turn(90f, 2f, false);
-		bot.driver.forward();
+		bot.driver.drive(7f, 2f, 1);
+		bot.driver.turn(90f, 2f, true);
+		bot.driver.drive(100f, 2f, 1, true);
+		bot.driver.drive(50f, 1f, 1, false);
 		
 		while (Button.ESCAPE.isUp()) {
+			System.out.println(bot.sensors.getRGB());
+			
 			//recognize different color
 			if (checkCliff(bot.sensors)) {
 				this.bot.driver.stop();
@@ -132,13 +135,20 @@ public class RunWay {
 				float error = bot.sensors.getAngel() - (this.startOrientation - 90f);
 				//this.bot.driver.turn(-error, 2f, false);
 			}
+			
+			// check for cliff
+			if (checkCliff(bot.sensors)) {
+				this.bot.driver.stop();
+				Sound.beepSequence();
+				bot.driver.drive(7f, 2f, -1);
+				bot.driver.turn(90f, 2f, true);
+				break;
+			}
 		}
 	}
 	
 	private void driveDown() {
-		bot.driver.drive(1f, 2f, -1);
-		bot.driver.turn(90f, 2f, false);
-		bot.driver.forward();
+		bot.driver.drive(150f, 2f, 1, false);
 		
 		while (Button.ESCAPE.isUp()) {
 			// Check for transition (color)
