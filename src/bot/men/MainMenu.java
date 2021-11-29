@@ -4,6 +4,7 @@ import java.util.*;
 
 import bot.Bot;
 import bot.nav.ColorSearch;
+import bot.nav.RunWay;
 import bot.nav.SLine;
 import lejos.utility.*;
 import lejos.hardware.*;
@@ -58,7 +59,7 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			// TODO Auto-generated method stub
+			new RunWay(bot).rampe();
 			
 		}},
     COLOR("Find color speckles and purr"){
