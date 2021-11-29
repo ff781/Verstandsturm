@@ -10,9 +10,7 @@ public class RunWay {
 	
 	private Bot bot;
 	
-	private float rStart;
-	private float gStart;
-	private float bStart;
+	private float[] rgbStart;
 	
 	private float startOrientation;
 	
@@ -28,10 +26,7 @@ public class RunWay {
 	public void rampe() {
 
 		startOrientation = this.bot.sensors.getAngel();
-		float[] rgbBack = this.bot.sensors.getRGB();
-		rStart = rgbBack[0];
-		gStart = rgbBack[1];
-		bStart = rgbBack[2];
+		rgbStart = this.bot.sensors.getRGB();
 		
 		LCD.clear();
 		
@@ -59,9 +54,11 @@ public class RunWay {
 			case 4:
 				System.out.println("Ramp Done");
 				finish();
+				phase = 5;
 				break;
 			default:
-				break;
+				System.out.println("Finito");
+				return;
 			}
 		}
 		
@@ -74,12 +71,10 @@ public class RunWay {
 		
 		while (Button.ESCAPE.isUp()) {
 			//recognize different color
-			if (checkColor(bot.sensors)) {
-				if (checkBlue(bot.sensors)) {
-					this.bot.driver.stop();
-					Sound.beepSequence();
-					break;
-				}
+			if (colorChange(bot.sensors) && checkBlue(bot.sensors)) {
+				this.bot.driver.stop();
+				Sound.beepSequence();
+				break;
 			}
 			
 			// check if Robot touches wall on left side
@@ -94,50 +89,58 @@ public class RunWay {
 	}
 	
 	private void driveUp() {
+		// check direction
+		if (checkGyro(bot.sensors)) {
+			float error = bot.sensors.getAngel() - this.startOrientation;
+			this.bot.driver.turn(-error, 2f, true);
+		}
+		
 		bot.driver.forward();
 		
 		while (Button.ESCAPE.isUp()) {
 			//recognize different color
-			if (checkColor(bot.sensors)) {
-				if (checkTransition(bot.sensors)){
-					this.bot.driver.stop();
-					Sound.beepSequence();
-					break;
-				}
-			}
-			
-			// check direction
-			if (checkGyro(bot.sensors)) {
-				float error = bot.sensors.getAngel() - this.startOrientation;
-				//this.bot.driver.turn(-error, 2f, false);
-			}
-		}
-	}
-	
-	private void driveAcross() {
-		bot.driver.drive(7f, 2f, 1);
-		bot.driver.turn(90f, 2f, true);
-		bot.driver.drive(100f, 2f, 1, true);
-		bot.driver.drive(50f, 1f, 1, false);
-		
-		while (Button.ESCAPE.isUp()) {
-			System.out.println(bot.sensors.getRGB());
-			
-			//recognize different color
-			if (checkCliff(bot.sensors)) {
+			if (colorChange(bot.sensors) && checkTransition(bot.sensors)){
 				this.bot.driver.stop();
+				bot.driver.drive(18f, 2f, 1, false);
 				Sound.beepSequence();
 				break;
 			}
 			
 			// check direction
 			if (checkGyro(bot.sensors)) {
+				float error = bot.sensors.getAngel() - this.startOrientation;
+				System.out.println(error);
+				//this.bot.driver.turn(-error, 2f, true);
+			}
+		}
+	}
+	
+	private void driveAcross() {
+		// check direction
+		if (checkGyro(bot.sensors)) {
+			float error = bot.sensors.getAngel() - (this.startOrientation - 90f);
+			this.bot.driver.turn(-error, 2f, false);
+		}
+		
+		bot.driver.turn(90f, 2f, true);
+		bot.driver.drive(150f, 1.75f, 1, false);
+		
+		while (Button.ESCAPE.isUp()) {
+			float[] rgb = bot.sensors.getRGB();
+			float r = rgb[0];
+			float g = rgb[1];
+			float b = rgb[2];
+			System.out.println(String.format("%.3f", r) + " " + String.format("%.3f", g) + " " + String.format("%.3f", b));
+			
+			// check direction
+			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - (this.startOrientation - 90f);
+				System.out.println(error);
 				//this.bot.driver.turn(-error, 2f, false);
 			}
 			
 			// check for cliff
-			if (checkCliff(bot.sensors)) {
+			if (colorChange(bot.sensors) && checkCliff(bot.sensors)) {
 				this.bot.driver.stop();
 				Sound.beepSequence();
 				bot.driver.drive(7f, 2f, -1);
@@ -159,7 +162,7 @@ public class RunWay {
 				break;
 			}*/
 			
-			if (checkBlue(bot.sensors)) {
+			if (colorChange(bot.sensors) && checkBlue(bot.sensors)) {
 				this.bot.driver.stop();
 				Sound.beepSequence();
 				break;
@@ -168,6 +171,7 @@ public class RunWay {
 			// check direction
 			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - (this.startOrientation - 180f);
+				System.out.println(error);
 				//this.bot.driver.turn(-error, 2f, false);
 			}
 		}
@@ -182,16 +186,11 @@ public class RunWay {
 	 * @param sensor to get the values from.
 	 * @return true if there was a color change detected, false else.
 	 */
-	private boolean checkColor(SensorThread sensor) {
+	private boolean colorChange(SensorThread sensor) {
 		float[] rgb = sensor.getRGB();
-		float r = rgb[0];
-		float g = rgb[1];
-		float b = rgb[2];
+		float threshold = 0.03f;
 		
-		if ((r - rStart) + (g - gStart) + (b - bStart) > 0.05 ) {
-			return true;
-		}
-		return false;
+		return rgbErrorSum(rgb, rgbStart) > threshold;
 	}
 	
 	private boolean checkBlue(SensorThread sensor) {
@@ -212,9 +211,9 @@ public class RunWay {
 	
 	private boolean checkCliff(SensorThread sensor) {
 		float[] rgb = sensor.getRGB();
-		float threshold = 2f;
+		float threshold = 0.07f;
 		
-		return rgb[0] + rgb[1] + rgb[2] > threshold;
+		return rgb[0] + rgb[1] + rgb[2] < threshold;
 	}
 	
 	private float rgbErrorSum(float measured[], float goal[]) {
