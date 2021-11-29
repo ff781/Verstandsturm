@@ -16,9 +16,9 @@ public class SLine {
 
   public void exec(Bot bot){
 	  LCD.clear();			
-	  System.out.println("Running simple line subroutine");
+	  System.out.println("Running line");
 	  float[] w = {0.163f, 0.283f, 0.133f};			// target rgb values for white
-	  float K_p = 1000;								// constant for P-Regler
+	  float K_p = 5000;								// constant for P-Regler
 	  
 	  float distance = 150;							// in cm
 	  float speed = 2;								// cm per second
@@ -30,15 +30,22 @@ public class SLine {
 	  
 	  while (true) {
 		  // Abbruchbedingungen
-		  if (followLineTask(bot, w, K_p) || motorsStopped(bot)
-				  || Button.ESCAPE.isDown()) {
+		  if (followLineTask(bot, w, K_p)) {
 			  LCD.clear();
+			  bot.driver.stop();
 			  return;
 		  }
 		  
 		  if (touchActivated(bot)) {
 			  // TODO: Hindernis umfahren
 			  LCD.clear();
+			  bot.driver.stop();
+			  return;
+		  }
+		  
+		  if (Button.ESCAPE.isDown()) {
+			  LCD.clear();
+			  bot.driver.stop();
 			  return;
 		  }
 	  }
