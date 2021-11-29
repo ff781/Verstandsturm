@@ -63,9 +63,9 @@ public class RunWay {
 			// check if Robot touches wall on left side
 			if (checkTouch(bot.sensors)) {
 				this.bot.driver.drive(1f, 2f, -1);
-				this.bot.driver.turnRotor(90f, 2f);
+				this.bot.driver.turn(90f, 2f, false);
 				this.bot.driver.drive(1f, 2f, -1);
-				this.bot.driver.turnRotor(-90f, 2f);
+				this.bot.driver.turn(-90f, 2f, false);
 				this.bot.driver.forward();
 			}
 		}
@@ -87,14 +87,14 @@ public class RunWay {
 			// check direction
 			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - this.startOrientation;
-				this.bot.driver.turnRotor(-error, 1f);
+				this.bot.driver.turn(-error, 1f, false);
 			}
 		}
 	}
 	
 	private void driveAcross() {
 		bot.driver.drive(1f, 2f, 1);
-		bot.driver.turnRotor(90f, 2f);
+		bot.driver.turn(90f, 2f, false);
 		bot.driver.forward();
 		
 		while (Button.ESCAPE.isUp()) {
@@ -108,14 +108,14 @@ public class RunWay {
 			// check direction
 			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - (this.startOrientation - 90f);
-				this.bot.driver.turnRotor(-error, 1f);
+				this.bot.driver.turn(-error, 1f, false);
 			}
 		}
 	}
 	
 	private void driveDown() {
 		bot.driver.drive(1f, 2f, -1);
-		bot.driver.turnRotor(90f, 2f);
+		bot.driver.turn(90f, 2f, false);
 		bot.driver.forward();
 		
 		while (Button.ESCAPE.isUp()) {
@@ -137,7 +137,7 @@ public class RunWay {
 			// check direction
 			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - (this.startOrientation - 180f);
-				this.bot.driver.turnRotor(-error, 1f);
+				this.bot.driver.turn(-error, 1f, false);
 			}
 		}
 	}
