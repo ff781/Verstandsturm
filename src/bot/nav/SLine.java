@@ -25,7 +25,8 @@ public class SLine {
 	  int direction = 1;							// 1: forward
 	  boolean blocking = false;						// don't block thread
 	  
-	  bot.driver.drive(distance, speed, direction, blocking);
+	  //bot.driver.drive(distance, speed, direction, blocking);
+	  bot.driver.forward();
 	  
 	  while (true) {
 		  // Abbruchbedingungen
