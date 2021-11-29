@@ -16,6 +16,8 @@ public class RunWay {
 	
 	private float startOrientation;
 	
+	private int phase = 0;
+	
 	public RunWay(Bot bot) {
 		this.bot = bot;
 	}
@@ -33,15 +35,35 @@ public class RunWay {
 		
 		LCD.clear();
 		
-		System.out.println("T1: Find B");
-		findBlueLine();
-		System.out.println("T2: Drive U");
-		driveUp();
-		System.out.println("T3: Drive L");
-		driveAcross();
-		System.out.println("T4: Drive D");
-		driveDown();
-		System.out.println("Ramp Done");
+		while (Button.ESCAPE.isUp()) {
+			switch(phase) {
+			case 0:
+				System.out.println("T1: Find B");
+				findBlueLine();
+				phase = 1;
+				break;
+			case 1:
+				System.out.println("T2: Drive U");
+				driveUp();
+				phase = 2;
+				break;
+			case 2:
+				System.out.println("T3: Drive L");
+				driveAcross();
+				phase = 3;
+				break;
+			case 3:
+				System.out.println("T4: Drive D");
+				driveDown();
+				phase = 4;
+			case 4:
+				System.out.println("Ramp Done");
+				finish();
+				break;
+			default:
+				break;
+			}
+		}
 		
 		this.bot.driver.stop();
 	}
@@ -87,7 +109,7 @@ public class RunWay {
 			// check direction
 			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - this.startOrientation;
-				this.bot.driver.turn(-error, 1f, false);
+				//this.bot.driver.turn(-error, 2f, false);
 			}
 		}
 	}
@@ -108,7 +130,7 @@ public class RunWay {
 			// check direction
 			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - (this.startOrientation - 90f);
-				this.bot.driver.turn(-error, 1f, false);
+				//this.bot.driver.turn(-error, 2f, false);
 			}
 		}
 	}
@@ -128,7 +150,6 @@ public class RunWay {
 			}*/
 			
 			if (checkBlue(bot.sensors)) {
-				bot.driver.drive(2f, 2f, 1);
 				this.bot.driver.stop();
 				Sound.beepSequence();
 				break;
@@ -137,9 +158,13 @@ public class RunWay {
 			// check direction
 			if (checkGyro(bot.sensors)) {
 				float error = bot.sensors.getAngel() - (this.startOrientation - 180f);
-				this.bot.driver.turn(-error, 1f, false);
+				//this.bot.driver.turn(-error, 2f, false);
 			}
 		}
+	}
+	
+	private void finish() {
+		bot.driver.drive(2f, 2f, 1);
 	}
 	
 	
