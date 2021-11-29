@@ -4,6 +4,7 @@ import bot.Bot;
 import bot.sen.SensorThread;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 
 public class RunWay {
 	
@@ -30,6 +31,23 @@ public class RunWay {
 		gStart = rgbBack[1];
 		bStart = rgbBack[2];
 		
+		LCD.clear();
+		
+		System.out.println("T1: Find B");
+		findBlueLine();
+		System.out.println("T2: Drive U");
+		driveUp();
+		System.out.println("T3: Drive L");
+		driveAcross();
+		System.out.println("T4: Drive D");
+		driveDown();
+		System.out.println("Ramp Done");
+		
+		this.bot.driver.stop();
+	}
+	
+	
+	private void findBlueLine() {
 		bot.driver.forward();
 		
 		while (Button.ESCAPE.isUp()) {
@@ -39,11 +57,27 @@ public class RunWay {
 					this.bot.driver.stop();
 					Sound.beepSequence();
 					break;
-				} else if (checkTransition(bot.sensors)){
-					this.bot.driver.stop();
-					Sound.beepSequence();
-					break;
-				} else if (checkCliff(bot.sensors)) {
+				}
+			}
+			
+			// check if Robot touches wall on left side
+			if (checkTouch(bot.sensors)) {
+				this.bot.driver.drive(1f, 2f, -1);
+				this.bot.driver.turnRotor(90f, 2f);
+				this.bot.driver.drive(1f, 2f, -1);
+				this.bot.driver.turnRotor(-90f, 2f);
+				this.bot.driver.forward();
+			}
+		}
+	}
+	
+	private void driveUp() {
+		bot.driver.forward();
+		
+		while (Button.ESCAPE.isUp()) {
+			//recognize different color
+			if (checkColor(bot.sensors)) {
+				if (checkTransition(bot.sensors)){
 					this.bot.driver.stop();
 					Sound.beepSequence();
 					break;
@@ -55,18 +89,57 @@ public class RunWay {
 				float error = bot.sensors.getAngel() - this.startOrientation;
 				this.bot.driver.turnRotor(-error, 1f);
 			}
-			
-			// check if Robot touches wall on left side
-			if (checkTouch(bot.sensors)) {
-				this.bot.driver.drive(0.1f, 2f, -1);
-				this.bot.driver.turnRotor(90f, 2f);
-				this.bot.driver.drive(0.1f, 2f, -1);
-				this.bot.driver.turnRotor(-90f, 2f);
-				this.bot.driver.forward();
-			}
-		
 		}
-		this.bot.driver.stop();
+	}
+	
+	private void driveAcross() {
+		bot.driver.drive(1f, 2f, 1);
+		bot.driver.turnRotor(90f, 2f);
+		bot.driver.forward();
+		
+		while (Button.ESCAPE.isUp()) {
+			//recognize different color
+			if (checkCliff(bot.sensors)) {
+				this.bot.driver.stop();
+				Sound.beepSequence();
+				break;
+			}
+			
+			// check direction
+			if (checkGyro(bot.sensors)) {
+				float error = bot.sensors.getAngel() - (this.startOrientation - 90f);
+				this.bot.driver.turnRotor(-error, 1f);
+			}
+		}
+	}
+	
+	private void driveDown() {
+		bot.driver.drive(1f, 2f, -1);
+		bot.driver.turnRotor(90f, 2f);
+		bot.driver.forward();
+		
+		while (Button.ESCAPE.isUp()) {
+			// Check for transition (color)
+			/*
+			if (checkTransition(bot.sensors)){
+				this.bot.driver.stop();
+				Sound.beepSequence();
+				break;
+			}*/
+			
+			if (checkBlue(bot.sensors)) {
+				bot.driver.drive(2f, 2f, 1);
+				this.bot.driver.stop();
+				Sound.beepSequence();
+				break;
+			}
+			
+			// check direction
+			if (checkGyro(bot.sensors)) {
+				float error = bot.sensors.getAngel() - (this.startOrientation - 180f);
+				this.bot.driver.turnRotor(-error, 1f);
+			}
+		}
 	}
 	
 	
