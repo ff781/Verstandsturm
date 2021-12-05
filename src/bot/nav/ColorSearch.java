@@ -1,6 +1,7 @@
 package bot.nav;
 
 import bot.Bot;
+
 import bot.sen.SensorThread;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -62,15 +63,15 @@ public class ColorSearch {
 			if(checkTouch(bot.sensors)) {
 				//Check sides first
 				if (cnt <= 3) {
-					this.bot.driver.turnRotor(90f, 2f);;
+					this.bot.driver.turnUS(90f, 2f);;
 					this.bot.driver.forward();
 					cnt++;
 				}
 				//then start checking inside the square
 				else {
-					this.bot.driver.turnRotor(90f, 2f);
+					this.bot.driver.turnUS(90f, 2f);
 					this.bot.driver.drive(2f, 2f, 1);
-					this.bot.driver.turnRotor(90f, 2f);
+					this.bot.driver.turnUS(90f, 2f);
 					this.bot.driver.forward();
 				}
 			}
