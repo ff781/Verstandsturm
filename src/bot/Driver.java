@@ -94,15 +94,16 @@ public class Driver {
 	public void drive_(float distance, float speed, float rotation) {
 		this.drive_(distance, speed, rotation, BLOCKING_DEFAULT);
 	}
-	public void drive_(float distance, float speed, float rotation, boolean blocking) {
+	public void drive_(float distance, float speed, float rotation, boolean blocking) { 
 		distance *= driveFactor;
 		//offset to actual 1,1 position for motor 
 		rotation += 45;
 		float rad = Meth.degToRad(rotation);
-		float lscalar = Meth.sin(rad);
-		float rscalar = Meth.cos(rad);
+		//scaled by sqrt(2) to get original 1,1 motor proportions instead of sqrt(2)^{-1},sqrt(2)^{-1}
+		float lscalar = Meth.sin(rad) * Meth.sqrtof2;
+		float rscalar = Meth.cos(rad) * Meth.sqrtof2;
 		Thread threadL = new RotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL);
-		Thread threadR = new RotateThread(this.bot.rMotor, rscalar*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
+		Thread threadR = new RotateThread(this.bot.rMotor, rscalar*distance*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
 		Thread[]threads = new Thread[]{
 				threadL, threadR,
 		};
@@ -157,6 +158,7 @@ public class Driver {
 	}
 	public boolean isMoving() {
 		return this.bot.lMotor.isMoving() || this.bot.rMotor.isMoving();
+	}
 	
 	public void forward() {
 		bot.lMotor.setSpeed(720);

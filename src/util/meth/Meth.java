@@ -2,7 +2,7 @@ package util.meth;
 
 import java.util.*;
 
-public class Meth {
+public class Meth{
 	
 	public static final float angelDist(float degA, float degB) {
 		float dist = Math.abs(degA - degB);
@@ -59,8 +59,9 @@ public class Meth {
 	public static final float cos(float a) {
 		return (float)Math.cos(a);
 	}
-	
+
 	public static double radDegRatio = 180/Math.PI;
+	public static float sqrtof2 = 1.4142135623730951f;
 	
 	public static final float radToDeg(float rad) {
 		return (float)(rad / radDegRatio);
