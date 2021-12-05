@@ -156,6 +156,17 @@ public class Driver {
 	}
 	public boolean isMoving() {
 		return this.bot.lMotor.isMoving() || this.bot.rMotor.isMoving();
+	
+	public void forward() {
+		bot.lMotor.setSpeed(720);
+		bot.rMotor.setSpeed(720);
+		bot.lMotor.forward();
+		bot.rMotor.forward();
+	}
+	
+	public void stop() {
+		bot.lMotor.stop();
+		bot.rMotor.stop();
 	}
 
 	static class RotateThread extends Thread {

@@ -4,6 +4,7 @@ import java.util.*;
 
 import bot.Bot;
 import bot.Driver;
+import bot.nav.ColorSearch;
 import bot.nav.SLine;
 import lejos.utility.*;
 import lejos.hardware.*;
@@ -65,7 +66,7 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			// TODO Auto-generated method stub
+			new ColorSearch(bot).search();
 			
 		}},
     SLINE("P-Regler simple line"){
