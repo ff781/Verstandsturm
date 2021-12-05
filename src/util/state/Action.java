@@ -1,4 +1,4 @@
-package bot.nav.line;
+package util.state;
 
 import bot.Bot;
 

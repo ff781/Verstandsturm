@@ -1,8 +1,20 @@
 package bot;
 
 import lejos.hardware.motor.*;
+import util.meth.Meth;
 
+/*
+ * degrees are in degrees, positive is counterclockwise="left"
+ * linear speed is in 3cm/s
+ * distance is in 1cm
+ * error is on average ~.07, worst case ~.15
+ */
 public class Driver {
+	
+	public static final float BACKWARD_DEGREES = 180;
+	public static final float FORWARD_DEGREES = 0;
+	
+	
 
 	public static final boolean BLOCKING_DEFAULT = true;
 
@@ -26,7 +38,7 @@ public class Driver {
 	/*
 	 * turns the robot
 	 * @param deg: degrees
-	 * @param speed: full rotation per second
+	 * @param speed: 45 degrees per second
 	 * @param blocking: method blocks
 	 */
 	public void turn(float deg, float speed){
@@ -67,9 +79,29 @@ public class Driver {
 	  this.drive(distance, speed, direction, BLOCKING_DEFAULT);
 	}
 	public void drive(float distance, float speed, int direction, boolean blocking){
-		distance *= driveFactor * direction;
-		Thread threadL = new RotateThread(this.bot.lMotor, distance*turnDegFactorL, speed*turnSpeedFactorL);
-		Thread threadR = new RotateThread(this.bot.rMotor, distance*turnDegFactorR, speed*turnSpeedFactorR);
+		this.drive_(distance, speed, (direction - 1) * (-90), blocking);
+	}
+	//drive with more complex direction parameter
+	//named drive_ for backwards compatibility
+	/*
+	 * drives forward or backward
+	 * @param distance: distance to drive
+	 * @param speed: centimeter per second of the faster track
+	 * @param rotation: 0 deg forward, 180 deg backward, other degree values interpolate in between
+	 * @param blocking: method blocks
+	 */
+	public void drive_(float distance, float speed, float rotation) {
+		this.drive_(distance, speed, rotation, BLOCKING_DEFAULT);
+	}
+	public void drive_(float distance, float speed, float rotation, boolean blocking) {
+		distance *= driveFactor;
+		//offset to actual 1,1 position for motor 
+		rotation += 45;
+		float rad = Meth.degToRad(rotation);
+		float lscalar = Meth.sin(rad);
+		float rscalar = Meth.cos(rad);
+		Thread threadL = new RotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL);
+		Thread threadR = new RotateThread(this.bot.rMotor, rscalar*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
 		Thread[]threads = new Thread[]{
 				threadL, threadR,
 		};
@@ -84,13 +116,13 @@ public class Driver {
 	}
 	
 	/*
-	 * turns rotor
+	 * turns ultrasonic(US) sensor
 	 * @param deg: degrees
-	 * @param speed: full rotation per second
+	 * @param speed: 45 degrees per second
 	 * @param blocking: method blocks
 	 */
-	public void turnRotor(float deg, float speed){
-		this.turn(deg, speed, BLOCKING_DEFAULT);
+	public void turnUS(float deg, float speed) {
+		this.turnUS(deg, speed, BLOCKING_DEFAULT);
 	}
 	public void turnUS(float deg, float speed, boolean blocking){
 		Thread[]threads = new Thread[]{
@@ -104,6 +136,26 @@ public class Driver {
 				throw new RuntimeException(e);
 			};
 		}
+	}
+	public void USStop() {
+		this.bot.rotor.stop();
+	}
+	public boolean isUSMoving() {
+		return this.bot.rotor.isMoving();
+	}
+	
+	public void driveForever(float speed) {
+		this.bot.lMotor.setSpeed(speed * turnSpeedFactorL);
+		this.bot.rMotor.setSpeed(speed * turnSpeedFactorR);
+		this.bot.lMotor.forward();
+		this.bot.rMotor.forward();
+	}
+	public void driveStop() {
+		this.bot.lMotor.stop();
+		this.bot.rMotor.stop();
+	}
+	public boolean isMoving() {
+		return this.bot.lMotor.isMoving() || this.bot.rMotor.isMoving();
 	}
 
 	static class RotateThread extends Thread {
@@ -122,5 +174,7 @@ public class Driver {
 			motor.rotate((int)rad);
 		}
 	}
+
+	
 
 }

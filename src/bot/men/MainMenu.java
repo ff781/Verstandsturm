@@ -3,6 +3,7 @@ package bot.men;
 import java.util.*;
 
 import bot.Bot;
+import bot.Driver;
 import bot.nav.SLine;
 import lejos.utility.*;
 import lejos.hardware.*;
@@ -77,30 +78,48 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			Screen.clear();
-			Screen.prints("Testing, use the buttons to maneuver!");
 			int mode = 0;
+			float[]speedFactors = {.25f,.5f,1,2,4};
+			String[]modeDesc = {"drive&turn mode","rotor turn mode","change speed mode"};
+			int i = 2;
 			while(!Screen.wasPressed(Button.ID_ESCAPE)) {
+				//Button.waitForAnyPress(); is that consumed by the other thread?
 				if (Button.ENTER.isDown()) {
-					mode = (mode + 1)%2;
+					mode = (mode + 1)%3;
 				}
+				Screen.clear();
+				Screen.prints("Testing, use the buttons to maneuver!");
+				Screen.prints(modeDesc[mode]);
 				switch(mode) {
 					case 0:
 						if(Button.LEFT.isDown()) {
-							bot.driver.turn(90, 1);
+							bot.driver.turn(90, 1 * speedFactors[i]);
 						}else if(Button.RIGHT.isDown()) {
-							bot.driver.turn(-90, 1);
+							bot.driver.turn(-90, 1 * speedFactors[i]);
 						}else if(Button.UP.isDown()) {
-							bot.driver.drive(1, 1, 1);
+							bot.driver.drive_(10, 1 * speedFactors[i], Driver.FORWARD_DEGREES);
 						}else if(Button.DOWN.isDown()) {
-							bot.driver.drive(1, 1, -1);
+							bot.driver.drive_(10, 1 * speedFactors[i], Driver.BACKWARD_DEGREES);
 						}
 						break;
 					case 1:
 						if(Button.LEFT.isDown()) {
-							bot.driver.turnRotor(90, 90);
+							bot.driver.turnUS(90, 1 * speedFactors[i]);
 						}else if(Button.RIGHT.isDown()) {
-							bot.driver.turnRotor(-90, 90);
+							bot.driver.turnUS(-90, 1 * speedFactors[i]);
+						}else if(Button.UP.isDown()) {
+						}else if(Button.DOWN.isDown()) {
+						}
+						break;
+					case 2:
+						Screen.prints("speed factor: "+i);
+						if(Button.LEFT.isDown()) {
+							i += 1;
+							i %= 5;
+						}else if(Button.RIGHT.isDown()) {
+							i -= 1;
+							i += 5;
+							i %= 5;
 						}else if(Button.UP.isDown()) {
 						}else if(Button.DOWN.isDown()) {
 						}

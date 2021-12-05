@@ -21,8 +21,6 @@ public class SensorThread implements Runnable{
 	this.tsm = ts != null ? new SensorWrap(ts.getTouchMode()) : SensorWrap.empty();
     this.usm = us != null ? new SensorWrap(us.getDistanceMode()) : SensorWrap.empty();
     this.gsm = gs != null ? new SensorWrap(gs.getAngleAndRateMode()) : SensorWrap.empty();
-
-    this.resetGs();
   }
   
   public void start() {
@@ -47,8 +45,12 @@ public class SensorThread implements Runnable{
   }
 
   public float getTouch(){
-	  this.assertTs();
+	this.assertTs();
     return this.tsm.getSample();
+  }
+  
+  public boolean isTouched() {
+	  return this.getTouch() == 1;
   }
 
   public float[] getRGB(){
@@ -107,8 +109,4 @@ public class SensorThread implements Runnable{
 	}
   }
   
-  public void resetGs() {
-	  if(gs!=null)
-	  this.gs.reset();
-  }
 }
