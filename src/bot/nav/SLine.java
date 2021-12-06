@@ -8,16 +8,16 @@ import lejos.hardware.lcd.LCD;
 public class SLine {
 
   //public static final float K_p = .268f;
-  private int initialSpeed = 240;
+  private int initialSpeed = 200;
   private int currentSpeedL = initialSpeed;
   private int currentSpeedR = initialSpeed;
   private int maxSpeed = 600;
   private long lastTimeOnWhite = System.currentTimeMillis();
   private long msOnBrown = 0;
-  private long brownThreshold = 600;
+  private long brownThreshold = 1500;
   //private float[] w = {0.163f, 0.283f, 0.133f};			// target rgb values for white
   private float[] w = {0.17f, 0.29f, 0.133f};			// target rgb values for white
-  private float K_p = 120;								// constant for P-Regler
+  private float K_p = 80;								// constant for P-Regler
   
 
   public SLine() {
@@ -75,10 +75,10 @@ public class SLine {
 		  result += (rgb[i] - brown[i]) / (white[i] - brown[i]);
 	  }
 	  
-	  if (result > 1.0f) return 1.0f;
-	  if (result < 0.0f) return 0.0f;
+	  if (result > 1.0f) result = 1.0f;
+	  if (result < 0.0f) result = 0.0f;
 	  
-	  return result;
+	  return 1 - result;
 	  //return (result > threshold) ? 0.0f : 1.0f;
   }
   
@@ -103,41 +103,33 @@ public class SLine {
 	  float[] r = bot.sensors.getRGB();
 	  
 	  if (isBlue(r)) return true;
-	  				// measured brightness
-	  float x_d = brownOrWhite(r);							// error
 	  
-	  if (x_d > 0.5) {
+	  float x_d = brownOrWhite(r);							// error
+	  x_d = 2 * x_d - 1;
+	  
+	  if (x_d > 0) {
+		  // brown
 		  msOnBrown = System.currentTimeMillis() - lastTimeOnWhite;
+		  if (msOnBrown > brownThreshold) {
+			  System.out.println("Find line!");
+			  bot.driver.forward(initialSpeed, initialSpeed);
+		  }
 	  } else {
+		  // white
 		  msOnBrown = 0;
 		  lastTimeOnWhite = System.currentTimeMillis();
 	  }
 	  
-	  if (msOnBrown > brownThreshold) {
-		  System.out.println("Find line! Exit");
-		  return true;
+	  if (msOnBrown < brownThreshold) {
+		  int y = Math.round(x_d * K_p);						// adjustment
+		  if (Math.abs(currentSpeedL + y) <= maxSpeed && Math.abs(currentSpeedR - y) <= maxSpeed) {
+			  currentSpeedL += y;
+			  currentSpeedR -= y;
+		  }
 	  }
 	  
-	  /*
-	  if (x_d < 0.1f) {
-		  // white
-		  currentSpeedL = initialSpeed;
-		  currentSpeedR = initialSpeed;
-	  } else {
-		  // brown
-		  int y = Math.round(x_d * K_p);						// adjustment
-		  if (Math.abs(currentSpeedL + y) < maxSpeed) currentSpeedL += y;
-		  if (Math.abs(currentSpeedR - y) < maxSpeed) currentSpeedR -= y;
-	  }
-	  */
-	  x_d = 2 * x_d - 1;
-	  int y = Math.round(x_d * K_p);						// adjustment
-	  if (Math.abs(currentSpeedL + y) <= maxSpeed && Math.abs(currentSpeedR - y) <= maxSpeed) {
-		  currentSpeedL += y;
-		  currentSpeedR -= y;
-	  }
 	  //System.out.println("rgb: " + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ". "
-	  System.out.println(String.format("%.0f", x_d) + " " + currentSpeedL + " " + currentSpeedR);
+	  System.out.println(String.format("%.1f", x_d) + " " + currentSpeedL + " " + currentSpeedR);
 	  bot.driver.forward(currentSpeedL, currentSpeedR);
 	  
 	  return false;
