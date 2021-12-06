@@ -14,6 +14,7 @@ public class SLine {
   private int maxSpeed = 600;
   private long lastTimeOnWhite = System.currentTimeMillis();
   private long msOnBrown = 0;
+  private long brownThreshold = 600;
   //private float[] w = {0.163f, 0.283f, 0.133f};			// target rgb values for white
   private float[] w = {0.17f, 0.29f, 0.133f};			// target rgb values for white
   private float K_p = 120;								// constant for P-Regler
@@ -110,6 +111,11 @@ public class SLine {
 	  } else {
 		  msOnBrown = 0;
 		  lastTimeOnWhite = System.currentTimeMillis();
+	  }
+	  
+	  if (msOnBrown > brownThreshold) {
+		  System.out.println("Find line! Exit");
+		  return true;
 	  }
 	  
 	  /*
