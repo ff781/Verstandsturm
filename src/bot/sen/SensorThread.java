@@ -65,17 +65,17 @@ public class SensorThread implements Runnable{
 
   public float getAngelV(){
 	  this.assertGs();
-    return this.gsm.getSample();
+    return this.gsm.getSamples()[1];
+  }
+
+  public float getAngel(){
+	this.assertGs();
+    return this.gsm.getSamples()[0];
   }
 
   public void resetAngel(){
 	this.assertGs();
     this.gs.reset();
-  }
-
-  public float getAngel(){
-	this.assertGs();
-    return this.gsm.getSamples()[1];
   }
   
   public void problem(String descr) {

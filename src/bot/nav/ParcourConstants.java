@@ -24,9 +24,9 @@ public class ParcourConstants {
 	public static final float CRAWL_TOWARDS_OBSTACLE_EDGE_DISTANCE_MAX = 25;
 	
 	//TODO
-	public static final float USS_CENTER_TO_BOT_REAR_DISTANCE = 11;
+	public static final float USS_CENTER_TO_BOT_REAR_DISTANCE = 13;
 	
-	public static final float COLOR_SENSOR_TO_BOT_REAR_DISTANCE = 13; 
+	public static final float COLOR_SENSOR_TO_BOT_REAR_DISTANCE = 14; 
 	
 	public static final boolean distanceMatch(float is, float goal) {
 		return Math.abs((is-goal)/goal) < DISTANCE_TOLERANCE;

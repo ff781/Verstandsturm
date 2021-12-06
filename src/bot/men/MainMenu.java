@@ -6,6 +6,7 @@ import bot.Bot;
 import bot.Driver;
 import bot.nav.ColorSearch;
 import bot.nav.SLine;
+import bot.nav.line.Line;
 import lejos.utility.*;
 import lejos.hardware.*;
 
@@ -45,8 +46,7 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			// TODO Auto-generated method stub
-			
+			Line.exec(bot);
 		}},
     PUSH("Bully the box"){
 
@@ -137,7 +137,7 @@ public class MainMenu extends TextMenu {
 				Screen.print("Testing, LRUP=CTGU!");
 				int mode = -1;
 				while(!Screen.wasPressed(Button.ID_ESCAPE)) {
-					Screen.sleep(250);
+					Screen.sleep(200);
 					if(Button.LEFT.isDown()) {
 						mode = 0;
 					}else if(Button.RIGHT.isDown()) {
@@ -150,20 +150,23 @@ public class MainMenu extends TextMenu {
 					Screen.clear();
 					switch(mode) {
 						case 0:
-							
-							Screen.print(String.format("RGB: %s %n",Arrays.toString(bot.sensors.getRGB())));
+							Screen.prints("R: "+bot.sensors.getRGB()[0]);
+							Screen.prints("G: "+bot.sensors.getRGB()[1]);
+							Screen.prints("B: "+bot.sensors.getRGB()[2]);
 							break;
 						case 1:
-							Screen.print(String.format("I am being touched %s%n", bot.sensors.getTouch()));
+							Screen.prints(String.format("being touched %s%n", bot.sensors.getTouch()));
 							break;
 						case 2:
-							Screen.print(String.format("Gyros%n current angle%s%n current angular speed%s%n", bot.sensors.getAngel(), bot.sensors.getAngelV()));
+							bot.sensors.resetAngel();
+							Screen.prints("Gyros|Angel|AngelV");
+							Screen.prints(bot.sensors.getAngel() + " " + bot.sensors.getAngelV());
 							break;
 						case 3:
-							Screen.print(String.format("Distance: %s%n", bot.sensors.getDistance()));
+							Screen.prints(String.format("Distance: %s%n", bot.sensors.getDistance()));
 							break;
 						case -1:
-							Screen.print("No sensor selected");
+							Screen.prints("No sensor selected");
 					}
 				}
 			}},

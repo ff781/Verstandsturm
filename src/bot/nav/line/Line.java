@@ -32,8 +32,6 @@ public class Line {
 		Line.instantiate(bot).exec(bot);
 	}
 	
-	public static void nigger(List<Integer> a) {}
-	
 	public static class ObstacleState extends State {
 		public ObstacleState(Bot bot) {
 			super(
