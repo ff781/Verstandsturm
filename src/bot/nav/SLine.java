@@ -12,6 +12,8 @@ public class SLine {
   private int currentSpeedL = initialSpeed;
   private int currentSpeedR = initialSpeed;
   private int maxSpeed = 600;
+  private long lastTimeOnWhite = System.currentTimeMillis();
+  private long msOnBrown = 0;
   //private float[] w = {0.163f, 0.283f, 0.133f};			// target rgb values for white
   private float[] w = {0.17f, 0.29f, 0.133f};			// target rgb values for white
   private float K_p = 120;								// constant for P-Regler
@@ -102,6 +104,14 @@ public class SLine {
 	  if (isBlue(r)) return true;
 	  				// measured brightness
 	  float x_d = brownOrWhite(r);							// error
+	  
+	  if (x_d > 0.5) {
+		  msOnBrown = System.currentTimeMillis() - lastTimeOnWhite;
+	  } else {
+		  msOnBrown = 0;
+		  lastTimeOnWhite = System.currentTimeMillis();
+	  }
+	  
 	  /*
 	  if (x_d < 0.1f) {
 		  // white
