@@ -8,14 +8,14 @@ import util.state.State;
 
 public class FoundLineColor extends _Predicate<Bot> implements Predicate<Bot> {
 		
-	float[]lineColor;
+	int lineColorI;
 	
-	public FoundLineColor(float[]lineColor) {
-		this.lineColor = lineColor;
+	public FoundLineColor(int lineColorI) {
+		this.lineColorI = lineColorI;
 	}
 	
 	@Override
 	public Boolean exec(Bot t) {
-		return colorMatch(t.sensors.getRGB(),lineColor);
+		return colorClassify(t.sensors.getRGB(),ALL_COLORS) == this.lineColorI;
 	}
 }

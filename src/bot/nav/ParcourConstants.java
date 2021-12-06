@@ -1,5 +1,7 @@
 package bot.nav;
 
+import bot.Bot;
+import lejos.robotics.Color;
 import util.meth.Meth;
 
 public class ParcourConstants {
@@ -23,7 +25,6 @@ public class ParcourConstants {
 	
 	public static final float CRAWL_TOWARDS_OBSTACLE_EDGE_DISTANCE_MAX = 25;
 	
-	//TODO
 	public static final float USS_CENTER_TO_BOT_REAR_DISTANCE = 13;
 	
 	public static final float COLOR_SENSOR_TO_BOT_REAR_DISTANCE = 14; 
@@ -54,11 +55,18 @@ public class ParcourConstants {
 	
 	//#colors
 	
-	public static final float COLOR_TOLERANCE = .1f;
+	public static final float COLOR_TOLERANCE = .2f;
 	
-	public static final float[]LINE_BLUE = {.0255f,.102f,.075f};
+	public static final float[]LINE_BLUE = {.0255f,.11f,.06f};
 	
-	public static final float[]LINE_WHITE = {.017f,.28f,.135f};
+	public static final float[]LINE_WHITE = {.0163f,.283f,.1313f};
+	
+	public static final float[]LINE_BROWN = {.02f,.0365f,.0039f};
+	
+	public static final int LINE_BLUE_I = 0;
+	public static final int LINE_WHITE_I = 1;
+	public static final int LINE_BROWN_I = 2;
+	public static final float[][]ALL_COLORS = {LINE_BLUE,LINE_WHITE,LINE_BROWN,};
 	
 	public static boolean colorMatch(float[]a,float[]b) {
 		return colorMatch(a,b,1);
@@ -67,9 +75,73 @@ public class ParcourConstants {
 		return Meth.length(Meth.sub(a, b)) < COLOR_TOLERANCE * toleranceFactor; 
 	}
 	
+	public static float colorBinaryClassify(float[] rgb, float[]a, float[]b) {
+		  float result = 0f;
+		  
+		  for (int i = 0; i < rgb.length; i++) {
+			  result += (rgb[i] - a[i]) / (a[i] - b[i]);
+		  }
+		  
+		  result /= 3.;
+		  
+		  return result;
+	  }
+	
+	public static float colorBinaryClassify_(float[]rgb, float[]a, float[]b) {
+		float distAToB = Meth.length(Meth.sub(b, a));
+		float distToA = Meth.length(Meth.sub(rgb, a));
+		float distToB = Meth.length(Meth.sub(rgb, b));
+		return (distToA - distToB) / distAToB;
+	}
+	
+	public static int colorClassify(float[]rgb, float[]...cs) {
+		float[]cc = null;
+		float min = Float.POSITIVE_INFINITY;
+		int ci = -1;
+		for(int i : Meth.intRange(0, cs.length)) {
+			float[] c = cs[i];
+			float dist = Meth.dist(rgb, c);
+			if(dist < min) {
+				cc = c;
+				min = dist;
+				ci = i;
+			}
+		}
+		return ci;
+	}
+	
 	public static final float SKIP_LINE_JITTER_DISTANCE = 4;
 	public static final float SKIP_LINE_JITTER_SPEED = 1;
 	public static final float SKIP_LINE_JITTER_ANGEL = 7;
+	
+	public static String rgbInfo(Bot bot) {
+		return rgbToString(bot.sensors.getRGB());
+	}
+	
+	public static String rgbToString(float[]rgb) {
+		return String.format("%.2f,%.2f,%.2f", rgb[0],rgb[1],rgb[2]); 
+	}
+	
+	public static String colorIDToString(int c) {
+		switch(c) {
+		case Color.RED: return "RED";
+		case Color.GREEN: return "GREEN";
+		case Color.BLUE: return "BLUE";
+		case Color.YELLOW: return "YELLOW";
+		case Color.MAGENTA: return "MAGENTA";
+		case Color.ORANGE: return "ORANGE";
+		case Color.WHITE: return "WHITE";
+		case Color.BLACK: return "BLACK";
+		case Color.PINK: return "PINK";
+		case Color.GRAY: return "GRAY";
+		case Color.LIGHT_GRAY: return "LIGHT_GRAY";
+		case Color.DARK_GRAY: return "DARK_GRAY";
+		case Color.CYAN: return "CYAN";
+		case Color.BROWN: return "BROWN";
+		case Color.NONE: return "NONE";
+		}
+		return "unknown color id " + c;
+	}
 
 	//#angels
 	

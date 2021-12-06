@@ -13,6 +13,7 @@ public class SensorThread implements Runnable{
   public SensorWrap tsm;
   public SensorWrap usm;
   public SensorWrap gsm;
+  public SensorWrap csmid;
 
   public SensorThread(EV3ColorSensor cs, EV3TouchSensor ts, EV3UltrasonicSensor us, EV3GyroSensor gs){
     this.gs = gs;
@@ -21,6 +22,12 @@ public class SensorThread implements Runnable{
 	this.tsm = ts != null ? new SensorWrap(ts.getTouchMode()) : SensorWrap.empty();
     this.usm = us != null ? new SensorWrap(us.getDistanceMode()) : SensorWrap.empty();
     this.gsm = gs != null ? new SensorWrap(gs.getAngleAndRateMode()) : SensorWrap.empty();
+    //this.csmid = cs != null ? new SensorWrap(cs.getColorIDMode()) : SensorWrap.empty();
+  }
+  
+  private SensorWrap[]g(){
+	  return new SensorWrap[]{csm,tsm,usm,gsm,};
+	  //return new SensorWrap[]{csm,tsm,usm,gsm,csmid,};
   }
   
   public void start() {
@@ -33,7 +40,7 @@ public class SensorThread implements Runnable{
   public void run(){
     try{
       while(true){
-        for(SensorWrap sw : new SensorWrap[]{csm,tsm,usm,gsm}){
+        for(SensorWrap sw : g()){
         	if(sw!=null)
         		sw.get();
         }
@@ -56,6 +63,11 @@ public class SensorThread implements Runnable{
   public float[] getRGB(){
 	  this.assertCs();
 	return this.csm.getSamples();
+  }
+  
+  public int getColorID() {
+	  this.assertCs();
+	  return (int)this.csmid.getSample();
   }
 
   public float getDistance(){

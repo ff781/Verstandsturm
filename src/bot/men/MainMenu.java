@@ -1,5 +1,7 @@
 package bot.men;
 
+import static bot.nav.ParcourConstants.*;
+
 import java.util.*;
 
 import bot.Bot;
@@ -8,6 +10,7 @@ import bot.nav.ColorSearch;
 import bot.nav.SLine;
 import bot.nav.line.Line;
 import lejos.utility.*;
+import util.meth.Meth;
 import lejos.hardware.*;
 
 public class MainMenu extends TextMenu {
@@ -29,12 +32,11 @@ public class MainMenu extends TextMenu {
   public void open(Bot bot){
     Sound.beepSequenceUp();
 
-		while (!Screen.wasPressed(Button.ID_ESCAPE)) {
+		while (Button.ESCAPE.isUp()) {
 						
 			Screen.clear();
 
-			int select = this.select();
-			
+			int select = this.select();			
 			if(select >= 0 && select < Task.values.length)
 			(Task.values[select]).exec(bot);
 			Screen.sleep(20);
@@ -46,6 +48,7 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
+			Screen.clear();
 			Line.exec(bot);
 		}},
     PUSH("Bully the box"){
@@ -85,7 +88,6 @@ public class MainMenu extends TextMenu {
 			String[]modeDesc = {"drive&turn mode","rotor turn mode","change speed mode"};
 			int i = 2;
 			while(!Screen.wasPressed(Button.ID_ESCAPE)) {
-				Button.waitForAnyPress();//is that consumed by the other thread?
 				if (Button.ENTER.isDown()) {
 					mode = (mode + 1)%3;
 				}
@@ -125,7 +127,7 @@ public class MainMenu extends TextMenu {
 						Screen.prints("speed factor: "+speedFactors[i]);
 						break;
 				}
-				
+				Button.waitForAnyPress();
 			}
 			
 		}},
@@ -143,6 +145,7 @@ public class MainMenu extends TextMenu {
 					}else if(Button.RIGHT.isDown()) {
 						mode = 1;
 					}else if(Button.UP.isDown()) {
+						bot.sensors.resetAngel();
 						mode = 2;
 					}else if(Button.DOWN.isDown()) {
 						mode = 3;
@@ -150,15 +153,14 @@ public class MainMenu extends TextMenu {
 					Screen.clear();
 					switch(mode) {
 						case 0:
-							Screen.prints("R: "+bot.sensors.getRGB()[0]);
-							Screen.prints("G: "+bot.sensors.getRGB()[1]);
-							Screen.prints("B: "+bot.sensors.getRGB()[2]);
+							Screen.prints("rgb: " + rgbInfo(bot));
+							Screen.prints(colorClassify(bot.sensors.getRGB(), LINE_WHITE, LINE_BROWN, LINE_BLUE) + "");
+							//Screen.prints(colorIDToString(bot.sensors.getColorID()));
 							break;
 						case 1:
 							Screen.prints(String.format("being touched %s%n", bot.sensors.getTouch()));
 							break;
 						case 2:
-							bot.sensors.resetAngel();
 							Screen.prints("Gyros|Angel|AngelV");
 							Screen.prints(bot.sensors.getAngel() + " " + bot.sensors.getAngelV());
 							break;

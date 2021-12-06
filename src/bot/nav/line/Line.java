@@ -3,7 +3,9 @@ package bot.nav.line;
 import java.util.*;
 
 import bot.*;
+import bot.men.Screen;
 import bot.nav.act.*;
+import lejos.hardware.Button;
 import util.func.*;
 import util.coll.*;
 import util.state.*;
@@ -29,7 +31,8 @@ public class Line {
 	}
 	
 	public static void exec(Bot bot) {
-		Line.instantiate(bot).exec(bot);
+		StateExecutor executor = Line.instantiate(bot);
+		executor.exec(bot);
 	}
 	
 	public static class ObstacleState extends State {
@@ -50,9 +53,9 @@ public class Line {
 			super(
 					new InfiniteDriveAction(LINE_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_BLUE),
-							new FoundLineColor(LINE_WHITE).negate(),
-							new FoundLineColor(LINE_WHITE).negate(),
+							new FoundLineColor(LINE_BLUE_I),
+							new FoundLineColor(LINE_WHITE_I).negate(),
+							new FoundLineColor(LINE_WHITE_I).negate(),
 							new Touched()
 							)
 					);
@@ -67,7 +70,7 @@ public class Line {
 			super(
 					new FiniteTurnAction(-90,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE)
+							new FoundLineColor(LINE_WHITE_I)
 							)
 					);
 		}
@@ -86,7 +89,7 @@ public class Line {
 			super(
 					new FiniteTurnAction(90,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE)
+							new FoundLineColor(LINE_WHITE_I)
 							)
 					);
 		}
@@ -104,7 +107,7 @@ public class Line {
 			super(
 					new FiniteTurnAction(180,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE)
+							new FoundLineColor(LINE_WHITE_I)
 							)
 					);
 		}
@@ -122,7 +125,7 @@ public class Line {
 			super(
 					new FiniteTurnAction(-180,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE)
+							new FoundLineColor(LINE_WHITE_I)
 							)
 					);
 		}
@@ -140,7 +143,7 @@ public class Line {
 			super(
 					new JitterAction(SKIP_LINE_JITTER_DISTANCE, SKIP_LINE_JITTER_SPEED, SKIP_LINE_JITTER_ANGEL),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE)
+							new FoundLineColor(LINE_WHITE_I)
 							)
 					);
 		}

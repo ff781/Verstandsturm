@@ -148,7 +148,7 @@ public class Obstacle {
 			@Override
 			public void run() {
 				bot.driver.drive_(CRAWL_TOWARDS_OBSTACLE_EDGE_DISTANCE_MAX, LINE_CROSSING_DETECTION_SPEED, Driver.FORWARD_DEGREES, false);
-				Predicate<Bot> predator = new FoundLineColor(LINE_WHITE);
+				Predicate<Bot> predator = new FoundLineColor(LINE_WHITE_I);
 				while(!stop[0] || predator.exec(bot)) {
 				}
 				bot.driver.driveStop();

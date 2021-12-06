@@ -8,11 +8,15 @@ public class ThreadBoundAction implements Action{
 	/*
 	 * The produced threads have to complete thread halting in finite time when the stop flag is set for ThreadBoundAction to terminate in finite time
 	 */
-	private Function2<Bot,boolean[],Thread> threadFactory;
+	protected Function2<Bot,boolean[],Thread> threadFactory;
 	
 	private Thread thread;
 	private boolean[]stop = new boolean[] {false};
 
+	protected ThreadBoundAction() {
+		
+	}
+	
 	public ThreadBoundAction(Function2<Bot,boolean[],Thread> threadFactory) {
 		super();
 		this.threadFactory = threadFactory;
@@ -23,7 +27,7 @@ public class ThreadBoundAction implements Action{
 		assert finished(bot);
 		thread = this.threadFactory.exec(bot,stop);
 		thread.setDaemon(true);
-		thread.run();
+		thread.start();
 	}
 
 	@Override
