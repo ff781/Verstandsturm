@@ -79,12 +79,13 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
+			Screen.sleep(100);
 			int mode = 0;
 			float[]speedFactors = {.25f,.5f,1,2,4};
 			String[]modeDesc = {"drive&turn mode","rotor turn mode","change speed mode"};
 			int i = 2;
 			while(!Screen.wasPressed(Button.ID_ESCAPE)) {
-				//Button.waitForAnyPress(); is that consumed by the other thread?
+				Button.waitForAnyPress();//is that consumed by the other thread?
 				if (Button.ENTER.isDown()) {
 					mode = (mode + 1)%3;
 				}
@@ -113,17 +114,15 @@ public class MainMenu extends TextMenu {
 						}
 						break;
 					case 2:
-						Screen.prints("speed factor: "+i);
-						if(Button.LEFT.isDown()) {
-							i += 1;
-							i %= 5;
-						}else if(Button.RIGHT.isDown()) {
+						if(Button.LEFT.isDown()||Button.DOWN.isDown()) {
 							i -= 1;
 							i += 5;
 							i %= 5;
-						}else if(Button.UP.isDown()) {
-						}else if(Button.DOWN.isDown()) {
+						}else if(Button.RIGHT.isDown()||Button.UP.isDown()) {
+							i += 1;
+							i %= 5;
 						}
+						Screen.prints("speed factor: "+speedFactors[i]);
 						break;
 				}
 				

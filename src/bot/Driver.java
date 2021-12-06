@@ -7,6 +7,7 @@ import util.meth.Meth;
 /*
  * degrees are in degrees, positive is counterclockwise="left"
  * linear speed is in 3cm/s
+ * rotation speed is 36°/s; 2.5s/full rotation
  * distance is in 1cm
  * error is on average ~.07, worst case ~.15
  */
@@ -24,8 +25,8 @@ public class Driver {
     public static final float turnSpeedFactorL = 150;
 	public static final float turnDegFactorR = 5.88f;
     public static final float turnSpeedFactorR = 150;
-	public static final float turnDegFactorUSM = 5;
-    public static final float turnSpeedFactorUSM = 100;
+	public static final float turnDegFactorUSM = 2.69f;
+    public static final float turnSpeedFactorUSM = 150;
     
     //scaling constant for drive distance
     public static final float driveFactor = 36 / turnDegFactorL;
@@ -39,7 +40,7 @@ public class Driver {
 	/*
 	 * turns the robot
 	 * @param deg: degrees
-	 * @param speed: 45 degrees per second
+	 * @param speed: see top for unit
 	 * @param blocking: method blocks
 	 */
 	public void turn(float deg, float speed){
@@ -71,8 +72,8 @@ public class Driver {
 
 	/*
 	 * drives forward or backward in a straight line
-	 * @param distance: distance to drive
-	 * @param speed: centimeter per second
+	 * @param distance: see top for unit
+	 * @param speed: see top for unit
 	 * @param direction: +1 forward, -1 backward
 	 * @param blocking: method blocks
 	 */
@@ -86,8 +87,8 @@ public class Driver {
 	//named drive_ for backwards compatibility
 	/*
 	 * drives forward or backward
-	 * @param distance: distance to drive
-	 * @param speed: centimeter per second of the faster track
+	 * @param distance: see top for unit
+	 * @param speed: sqrt(2) if only one track moves, 1 if both tracks move equally
 	 * @param rotation: 0 deg forward, 180 deg backward, other degree values interpolate in between
 	 * @param blocking: method blocks
 	 */
@@ -127,6 +128,7 @@ public class Driver {
 		this.turnUS(deg, speed, BLOCKING_DEFAULT);
 	}
 	public void turnUS(float deg, float speed, boolean blocking){
+		deg *= -1;
 		Thread[]threads = new Thread[]{
 				new RotateThread(this.bot.rotor, deg*turnDegFactorUSM, speed*turnSpeedFactorUSM),
 		};
