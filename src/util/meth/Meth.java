@@ -64,10 +64,10 @@ public class Meth{
 	public static float sqrtof2 = 1.4142135623730951f;
 	
 	public static final float radToDeg(float rad) {
-		return (float)(rad / radDegRatio);
+		return (float)(rad * radDegRatio);
 	}
 	
 	public static final float degToRad(float deg) {
-		return (float)(deg * radDegRatio);
+		return (float)(deg / radDegRatio);
 	}
 }
