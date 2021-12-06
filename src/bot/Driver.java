@@ -116,8 +116,17 @@ public class Driver {
 	public void forward(int lSpeed, int rSpeed) {
 		bot.lMotor.setSpeed(lSpeed);
 		bot.rMotor.setSpeed(rSpeed);
-		bot.lMotor.forward();
-		bot.rMotor.forward();
+		if (lSpeed >= 0) {
+			bot.lMotor.forward();
+		} else {
+			bot.lMotor.backward();
+		}
+		
+		if (rSpeed >= 0) {
+			bot.rMotor.forward();
+		} else {
+			bot.rMotor.backward();
+		}
 	}
 	
 	public void stop() {
