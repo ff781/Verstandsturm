@@ -39,14 +39,10 @@ public class ColorSearch {
 		
 		while(Button.ESCAPE.isUp()) {
 			
-			float current = 1f;
-	
-			
 			//recognize different color
 			if(checkColor(bot.sensors)) {
 				if(!foundFirst) {
 					//first color found
-					this.bot.driver.stop();
 					Sound.beepSequenceUp();
 					float[] rgb = this.bot.sensors.getRGB();
 					rFirst = rgb[0];
@@ -67,32 +63,33 @@ public class ColorSearch {
 			if(checkTouch(bot.sensors)) {
 				//Check sides first
 				if (cnt == 0) {
-					this.bot.driver.drive(5f, 4f, -1);
+					this.bot.driver.drive(3f, 4f, -1);
 					this.bot.driver.turnGyro(90f, 2f);
 					this.bot.driver.forward();
-					cnt++;
+					cnt += 2;
 				}
 				//then start checking inside the square
 				else {
 					if(cnt % 2 == 0) {
-						this.bot.driver.drive(5f, 4f, -1);
+						this.bot.driver.drive(4f, 4f, -1);
 						this.bot.driver.turnGyro(90f, 2f);
-						this.bot.driver.drive(5f, 4f, 1);
+						this.bot.driver.drive(6f, 4f, 1);
 						this.bot.driver.turnGyro(90f, 2f);
+						this.bot.driver.drive(4f, 4f, 1);
 						this.bot.driver.forward();
 						cnt++;
 					}
 					else {
-						this.bot.driver.drive(5f, 4f, -1);
+						this.bot.driver.drive(4f, 4f, -1);
 						this.bot.driver.turnGyro(-90f, 2f);
-						this.bot.driver.drive(5f, 4f, 1);
+						this.bot.driver.drive(6f, 4f, 1);
 						this.bot.driver.turnGyro(-90f, 2f);
+						this.bot.driver.drive(4f, 4f, 1);
 						this.bot.driver.forward();
 						cnt++;
 					}
 				}
 			}
-		
 		}
 		this.bot.driver.stop();
 		LCD.clear();
@@ -113,7 +110,7 @@ public class ColorSearch {
 				return true;
 			}
 			else {
-				if((r - rFirst) + (g- gFirst) + (b - bFirst) > 0.05 ) {
+				if((r - rFirst) + (g- gFirst) + (b - bFirst) > 0.10 ) {
 					return true;
 				}
 			}
@@ -127,6 +124,13 @@ public class ColorSearch {
 	 */
 	private boolean checkTouch(SensorThread sensor) {
 		if(sensor.getTouch() == 1) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean checkUs(SensorThread sensor) {
+		if( sensor.getDistance() <= 0.1f) {
 			return true;
 		}
 		return false;

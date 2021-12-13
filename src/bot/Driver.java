@@ -66,7 +66,7 @@ public class Driver {
 	}
 	
 	public void turnGyro(float deg, float speed){
-		this.bot.sensors.resetAngel();
+		float origin = this.bot.sensors.getAngel();
 		float dir;
 		if (deg >= 0f) {
 			turn(200, speed, false);
@@ -76,18 +76,18 @@ public class Driver {
 			System.out.println("right");
 			turn(-200, speed, false);
 		}
-		dir = (deg * 0.81f);
+		dir = (deg * 0.85f);
 		System.out.println(dir);
 		while(Button.ESCAPE.isUp()) {
 			if (dir >= 0) {
-				if(this.bot.sensors.getAngel() >= dir) {
+				if(this.bot.sensors.getAngel() - origin >= dir) {
 					System.out.println("stop");
 					stop();
 					break;
 				}
 			}
 			else {
-				if(this.bot.sensors.getAngel() <= dir) {
+				if(this.bot.sensors.getAngel() - origin <= dir) {
 					System.out.println("stop");
 					stop();
 					break;
