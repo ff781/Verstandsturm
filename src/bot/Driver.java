@@ -32,6 +32,9 @@ public class Driver {
     
     //scaling constant for drive distance
     public static final float driveFactor = 36 / turnDegFactorL;
+    
+    // saving US position (degrees). Assumption: start at 0 (forward facing)
+    private float usPosition = 0;
 
 	Bot bot;
 
@@ -152,6 +155,20 @@ public class Driver {
 				throw new RuntimeException(e);
 			};
 		}
+	}
+	
+	
+	public float getUSPosition() {
+		return this.usPosition;
+	}
+	
+	public void setUSPosition(float goalPos, float speed, boolean blocking) {
+		assert goalPos >= -90f;
+		assert goalPos <= 90f;
+		
+		float difference = goalPos - usPosition;
+		
+		turnUS(difference, speed, blocking);
 	}
 	
 	/*
