@@ -100,9 +100,9 @@ public class MainMenu extends TextMenu {
 						break;
 					case 1:
 						if(Button.LEFT.isDown()) {
-							bot.driver.turnRotor(90, 90);
+							bot.driver.turn(90, 90);
 						}else if(Button.RIGHT.isDown()) {
-							bot.driver.turnRotor(-90, 90);
+							bot.driver.turn(-90, 90);
 						}else if(Button.UP.isDown()) {
 						}else if(Button.DOWN.isDown()) {
 						}

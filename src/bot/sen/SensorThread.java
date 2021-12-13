@@ -73,7 +73,7 @@ public class SensorThread implements Runnable{
 
   public float getAngel(){
 	this.assertGs();
-    return this.gsm.getSamples()[1];
+    return this.gsm.getSamples()[0];
   }
   
   public void problem(String descr) {

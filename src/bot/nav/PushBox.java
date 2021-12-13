@@ -7,14 +7,20 @@ import lejos.hardware.Sound;
 
 public class PushBox {
 
-	Bot bot;
+	private Bot bot;
 	
-	float r, rBack;
-	float g, gBack;
-	float b, bBack;
+	float conts = 5f;
+	
+	private float r, rBack;
+	private float g, gBack;
+	private float b, bBack;
+	private float cornerAngle;
+	
+	Phase phase;
 	
 	public PushBox(Bot bot) {
 		this.bot = bot;
+		this.phase = Phase.FIRST;
 	}
 	
 	public void start() {
@@ -24,20 +30,46 @@ public class PushBox {
 		gBack = rgbBack[1];
 		bBack = rgbBack[2];
 		
-		this.bot.driver.turnRotor(90f, 2f);
 		this.bot.driver.forward();
 		
 		while(Button.ESCAPE.isUp()) {
+			
+			if (this.phase == Phase.THIRD) {
+			Sound.twoBeeps();
+			break;	
+			}
+			
+			
 			if (checkTouch(bot.sensors)) {
-				this.bot.driver.turnRotor(-90f, 2f);
-				this.bot.driver.forward();
+				if(this.phase == Phase.FIRST) {
+					this.bot.driver.turn(-(90f), 2f);
+					this.bot.driver.forward();
+				}
+				else if (this.phase == Phase.SECOND) {
+					this.bot.driver.turn(90f, 2f);
+					this.bot.driver.drive(8f, 2f, 1);
+					this.bot.driver.turn(90f, 2f);
+					this.bot.driver.forward();
+				}
 			}
 			
 			if (checkColor(bot.sensors)) {
+				if(this.phase == Phase.FIRST) {
+				this.bot.sensors.resetAngel();
+				this.phase = Phase.SECOND;
+				this.bot.driver.turn(180f, 2f);
+				this.bot.driver.forward();
 				Sound.beep();
-				bot.driver.stop();
+				}
+				else if (this.phase == Phase.SECOND){
+					this.cornerAngle = this.bot.sensors.getAngel();
+					Sound.buzz();
+					this.phase = Phase.THIRD;
+				}
 			}
+			
 		}
+		this.bot.driver.stop();
 	}
 	
 	private boolean checkColor(SensorThread sensor) {
@@ -61,6 +93,12 @@ public class PushBox {
 			return true;
 		}
 		return false;
+	}
+	
+	enum Phase {
+		FIRST,
+		SECOND,
+		THIRD
 	}
 	
 }
