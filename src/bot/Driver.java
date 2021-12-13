@@ -101,12 +101,11 @@ public class Driver {
 	}
 	
 	
-	public void directionChange(float y) {
+	public void directionChange(int y) {
 		int lSpeed = this.bot.lMotor.getSpeed();
 		int rSpeed = this.bot.rMotor.getSpeed();
 		
-		this.bot.lMotor.setSpeed(lSpeed + y);
-		this.bot.rMotor.setSpeed(rSpeed - y);
+		forward(lSpeed + y, rSpeed - y);
 	}
 
 	/*
@@ -163,12 +162,14 @@ public class Driver {
 	}
 	
 	public void setUSPosition(float goalPos, float speed, boolean blocking) {
-		assert goalPos >= -90f;
-		assert goalPos <= 90f;
+		assert goalPos >= -110f;
+		assert goalPos <= 110f;
 		
 		float difference = goalPos - usPosition;
 		
 		turnUS(difference, speed, blocking);
+		
+		usPosition += difference;
 	}
 	
 	/*
@@ -181,6 +182,7 @@ public class Driver {
 		this.turnUS(deg, speed, BLOCKING_DEFAULT);
 	}
 	public void turnUS(float deg, float speed, boolean blocking){
+		usPosition += deg;
 		deg *= -1;
 		Thread[]threads = new Thread[]{
 				new RotateThread(this.bot.rotor, deg*turnDegFactorUSM, speed*turnSpeedFactorUSM),
