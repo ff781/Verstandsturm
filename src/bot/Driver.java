@@ -222,6 +222,22 @@ public class Driver {
 		bot.rMotor.forward();
 	}
 	
+	public void forward(int lSpeed, int rSpeed) {
+		bot.lMotor.setSpeed(lSpeed);
+		bot.rMotor.setSpeed(rSpeed);
+		if (lSpeed >= 0) {
+			bot.lMotor.forward();
+		} else {
+			bot.lMotor.backward();
+		}
+		
+		if (rSpeed >= 0) {
+			bot.rMotor.forward();
+		} else {
+			bot.rMotor.backward();
+		}
+	}
+	
 	public void stop() {
 		bot.lMotor.stop();
 		bot.rMotor.stop();
