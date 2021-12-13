@@ -7,7 +7,9 @@ import lejos.hardware.motor.*;
 import lejos.hardware.port.*;
 import lejos.hardware.sensor.*;
 import lejos.hardware.device.*;
-import lejos.robotics.navigation.DifferentialPilot;
+
+import lejos.robotics.chassis.*;
+import lejos.robotics.navigation.*;
 
 import java.util.*;
 
@@ -20,8 +22,9 @@ public class Bot {
 	public static final float SAGITTAL_LENGTH = 1;
 	public static final float CORONAL_LENGTH = 1;
 	public static final float AXIAL_LENGTH = 1;
-
-	public static final float WHEEL_DIAMETER = 1;
+	
+	public static final float TRACK_WIDTH = 11.5f; 
+	public static final float WHEEL_DIAMETER = 3.5f;
 
 	public EV3LargeRegulatedMotor lMotor;
 	public EV3LargeRegulatedMotor rMotor;
@@ -35,7 +38,9 @@ public class Bot {
 	public Map<Port,Boolean> plugged = new HashMap<>();
 
 	public MainMenu mainMenu;
-
+	
+	//public MovePilot pilot;
+	public DifferentialPilot pilot;
 	public Driver driver;
 
 	public Bot() {
@@ -71,8 +76,17 @@ public class Bot {
 		this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
 
 		this.mainMenu = new MainMenu();
+	
+		//robot steering mechanisms
 		this.driver = new Driver(this);
+//		Wheel lWheel = WheeledChassis.modelWheel(this.lMotor, WHEEL_DIAMETER).offset(- TRACK_WIDTH * .5);
+//		Wheel rWheel = WheeledChassis.modelWheel(this.rMotor, WHEEL_DIAMETER).offset(TRACK_WIDTH * .5);
+//		Wheel[]wheels = new Wheel[] {lWheel, rWheel,};
+//		WheeledChassis chassis = new WheeledChassis(wheels, WheeledChassis.TYPE_DIFFERENTIAL);
+//		this.pilot = new MovePilot(chassis);
+		this.pilot = new DifferentialPilot(WHEEL_DIAMETER, TRACK_WIDTH, this.lMotor, this.rMotor);
 
+		//starts sensor thread
 		this.sensors.start();
 		
 		Screen.startButtonThread();

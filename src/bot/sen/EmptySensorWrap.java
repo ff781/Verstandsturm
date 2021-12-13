@@ -26,7 +26,7 @@ public class EmptySensorWrap extends SensorWrap {
 
 	@Override
 	public boolean isIgnorant() {
-		boolean r = ignore;
+	  boolean r = ignore;
 	  if(!ignore) ignore = true;
 	  return r;
 	}

@@ -9,6 +9,10 @@ public class Meth{
 		return dist > 180 ? 360 - dist : dist;
 	}
 	
+	public static final float dist(float[]a,float[]b) {
+		return length(sub(a,b));
+	}
+	
 	public static final float length(float[]a) {
 		return pnorm(a, 2);
 	}
