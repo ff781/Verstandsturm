@@ -64,7 +64,7 @@ public class SLine {
    * @param rgb
    * @return 0.0 if on white, 1.0 if on brown
    */
-  private float brownOrWhite(float[] rgb) {
+  public static float brownOrWhite(float[] rgb) {
 	  float[] brown = {0.02f, 0.0365f, 0.0039f};
 	  float[] white = {0.163f, 0.283f, 0.1313f};
 	  float threshold = 0.5f;

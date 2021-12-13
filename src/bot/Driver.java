@@ -169,7 +169,10 @@ public class Driver {
 		
 		turnUS(difference, speed, blocking);
 		
-		usPosition += difference;
+		usPosition = goalPos;
+		
+		if (usPosition > 90) usPosition = 90;
+		if (usPosition < -90) usPosition = -90;
 	}
 	
 	/*
