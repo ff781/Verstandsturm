@@ -7,6 +7,7 @@ import java.util.*;
 import bot.Bot;
 import bot.Driver;
 import bot.nav.ColorSearch;
+import bot.nav.PushBox;
 import bot.nav.SLine;
 import bot.nav.line.Line;
 import lejos.utility.*;
@@ -55,7 +56,7 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			// TODO Auto-generated method stub
+			new PushBox(bot).exec();
 			
 		}},
     RUNWAY("Walk the runway"){
