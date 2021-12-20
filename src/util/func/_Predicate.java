@@ -4,14 +4,14 @@ public abstract class _Predicate<A> implements Predicate<A> {
 	
 	private _NegatedPredicate negation;
 
-	public Predicate<A> negate(){
+	public _Predicate<A> negate(){
 		if(negation==null) {
 			negation = new _NegatedPredicate();
 		}
 		return negation; 
 	}
 	
-	public Predicate<A> and(Predicate<A> other) {
+	public _Predicate<A> and(Predicate<A> other) {
 		return new _AndedPredicate(other);
 	}
 	
@@ -22,7 +22,7 @@ public abstract class _Predicate<A> implements Predicate<A> {
 			return !_Predicate.this.exec(t);
 		}
 		
-		public Predicate<A> negate(){
+		public _Predicate<A> negate(){
 			return _Predicate.this; 
 		}
 		

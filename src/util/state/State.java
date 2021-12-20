@@ -17,8 +17,12 @@ public class State {
 	public List<Predicate<Bot>> edgePreds;
 	//list of all edge targets from this state
 	public List<State> edgeTars;
+	//finalizing actions executed when the given edge is taken
+	public Map<Integer,Action> edgeFinalizingActions;
 	//next state if the action fully completes
 	public State next;
+	//an action that is executed if the state through action end, has to terminate in finite time
+	public Action nextFinalizingAction;
 	
 	private State() {}
 	
@@ -38,7 +42,15 @@ public class State {
 
 	public List<State> edgeTars() {
 		return this.edgeTars;
-	} 
+	}
+
+	public Map<Integer,Action> edgeFinalizingActions() {
+		return this.edgeFinalizingActions==null ? Collections.EMPTY_MAP : this.edgeFinalizingActions;
+	}
+	
+	public Action nextFinalizingAction() {
+		return this.nextFinalizingAction;
+	}
 	
 	public State next() {
 		return this.next;

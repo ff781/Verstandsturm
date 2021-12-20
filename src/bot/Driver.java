@@ -155,8 +155,24 @@ public class Driver {
 		this.bot.rMotor.forward();
 	}
 	public void driveStop() {
-		this.bot.lMotor.stop();
-		this.bot.rMotor.stop();
+		Thread[]threads = new Thread[] {
+				new Thread() {
+					public void run() {
+						bot.rMotor.stop();
+					}
+				},
+				new Thread() {
+					public void run() {
+						bot.lMotor.stop();
+					}
+				},
+		};
+		for(Thread t:threads)t.start();
+		try{
+			for(Thread t:threads)t.join();
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		};
 	}
 	public boolean isMoving() {
 		return this.bot.lMotor.isMoving() || this.bot.rMotor.isMoving();

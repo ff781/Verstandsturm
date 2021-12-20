@@ -3,9 +3,7 @@ package bot.nav.line;
 import java.util.*;
 
 import bot.*;
-import bot.men.Screen;
 import bot.nav.act.*;
-import lejos.hardware.Button;
 import util.func.*;
 import util.coll.*;
 import util.state.*;
@@ -18,6 +16,7 @@ public class Line {
 	static State rotRToL; static State rotLToR;
 	static State skipline;
 	static State obstacle;
+	static int lastSuccessLR = 0;
 	static {
 		online = new OnlineState();
 		rotToR = new RotToRState();rotToL = new RotToLState();
@@ -53,9 +52,19 @@ public class Line {
 			super(
 					new InfiniteDriveAction(LINE_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_BLUE_I),
-							new FoundLineColor(LINE_WHITE_I).negate(),
-							new FoundLineColor(LINE_WHITE_I).negate(),
+							new Predicate.False<Bot>(),
+							brownWhite().and(new Predicate<Bot>() {
+								@Override
+								public Boolean exec(Bot t) {
+									return lastSuccessLR>=0;
+								}
+							}),
+							brownWhite().and(new Predicate<Bot>() {
+								@Override
+								public Boolean exec(Bot t) {
+									return lastSuccessLR<=0;
+								}
+							}),
 							new Touched()
 							)
 					);
@@ -70,9 +79,11 @@ public class Line {
 			super(
 					new FiniteTurnAction(-90,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
+							whiteBrown()
 							)
 					);
+			this.edgeFinalizingActions = new HashMap<>();
+			this.edgeFinalizingActions.put(0, SetLastSuccessAction.right());
 		}
 
 		@Override
@@ -89,9 +100,11 @@ public class Line {
 			super(
 					new FiniteTurnAction(90,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
+							whiteBrown()
 							)
 					);
+			this.edgeFinalizingActions = new HashMap<>();
+			this.edgeFinalizingActions.put(0, SetLastSuccessAction.left());
 		}
 		@Override
 		public List<State> edgeTars() {
@@ -107,9 +120,14 @@ public class Line {
 			super(
 					new FiniteTurnAction(180,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
+							whiteBrown()
 							)
 					);
+			
+			this.nextFinalizingAction = new FiniteTurnAction(-(90+DEGREE_EPSILON),DEFAULT_TURN_SPEED);
+
+			this.edgeFinalizingActions = new HashMap<>();
+			this.edgeFinalizingActions.put(0, SetLastSuccessAction.left());
 		}
 		@Override
 		public List<State> edgeTars() {
@@ -125,9 +143,13 @@ public class Line {
 			super(
 					new FiniteTurnAction(-180,LINE_TURN_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
+							whiteBrown()
 							)
 					);
+			this.nextFinalizingAction = new FiniteTurnAction(90+DEGREE_EPSILON,DEFAULT_TURN_SPEED);
+
+			this.edgeFinalizingActions = new HashMap<>();
+			this.edgeFinalizingActions.put(0, SetLastSuccessAction.right());
 		}
 		@Override
 		public List<State> edgeTars() {
@@ -143,7 +165,7 @@ public class Line {
 			super(
 					new JitterAction(SKIP_LINE_JITTER_DISTANCE, SKIP_LINE_JITTER_SPEED, SKIP_LINE_JITTER_ANGEL),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
+							whiteBrown()
 							)
 					);
 		}
@@ -151,5 +173,27 @@ public class Line {
 		public List<State> edgeTars() {
 			return CollUtil.listOf(online);
 		}
+	}
+	
+	public static class SetLastSuccessAction extends ImmediateAction {
+		int target;
+		
+		public SetLastSuccessAction(int target) {
+			super();
+			this.target = target;
+		}
+
+		@Override
+		public void start(Bot bot) {
+			lastSuccessLR = this.target;
+		}
+		
+		public static SetLastSuccessAction left() {
+			return new SetLastSuccessAction(-1);
+		}
+		public static SetLastSuccessAction right() {
+			return new SetLastSuccessAction(1);
+		}
+		
 	}
 }
