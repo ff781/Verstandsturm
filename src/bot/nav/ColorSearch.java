@@ -1,10 +1,10 @@
 package bot.nav;
 
 import bot.Bot;
-
 import bot.sen.SensorThread;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 
 public class ColorSearch {
 	
@@ -25,8 +25,10 @@ public class ColorSearch {
 	 * Searches a closed room for 2 different colored squares, produces a beep sound when it finds the first one and stops the robots when it finds the second one.
 	 */
 	public void search() {
+		LCD.clear();
 		
 		int cnt = 0;
+		
 		
 		float[] rgbBack = this.bot.sensors.getRGB();
 		rBack = rgbBack[0];
@@ -36,6 +38,8 @@ public class ColorSearch {
 		bot.driver.forward();;
 		
 		while(Button.ESCAPE.isUp()) {
+			
+			float current = 1f;
 	
 			
 			//recognize different color
@@ -62,22 +66,36 @@ public class ColorSearch {
 			//Robot touches wall
 			if(checkTouch(bot.sensors)) {
 				//Check sides first
-				if (cnt <= 3) {
-					this.bot.driver.turnUS(90f, 2f);;
+				if (cnt == 0) {
+					this.bot.driver.drive(5f, 4f, -1);
+					this.bot.driver.turnGyro(90f, 2f);
 					this.bot.driver.forward();
 					cnt++;
 				}
 				//then start checking inside the square
 				else {
-					this.bot.driver.turnUS(90f, 2f);
-					this.bot.driver.drive(2f, 2f, 1);
-					this.bot.driver.turnUS(90f, 2f);
-					this.bot.driver.forward();
+					if(cnt % 2 == 0) {
+						this.bot.driver.drive(5f, 4f, -1);
+						this.bot.driver.turnGyro(90f, 2f);
+						this.bot.driver.drive(5f, 4f, 1);
+						this.bot.driver.turnGyro(90f, 2f);
+						this.bot.driver.forward();
+						cnt++;
+					}
+					else {
+						this.bot.driver.drive(5f, 4f, -1);
+						this.bot.driver.turnGyro(-90f, 2f);
+						this.bot.driver.drive(5f, 4f, 1);
+						this.bot.driver.turnGyro(-90f, 2f);
+						this.bot.driver.forward();
+						cnt++;
+					}
 				}
 			}
 		
 		}
-		bot.driver.stop();
+		this.bot.driver.stop();
+		LCD.clear();
 	}
 	
 	/**
@@ -113,4 +131,5 @@ public class ColorSearch {
 		}
 		return false;
 	}
+	
 }
