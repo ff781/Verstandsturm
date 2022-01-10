@@ -49,7 +49,7 @@ public class MainMenu extends TextMenu {
 		@Override
 		void exec(Bot bot) {
 			Screen.clear();
-			Line.exec(bot);
+			Line.exec(bot, true);
 		}},
     PUSH("Bully the box"){
 
@@ -153,8 +153,11 @@ public class MainMenu extends TextMenu {
 					Screen.clear();
 					switch(mode) {
 						case 0:
-							Screen.prints("rgb: " + rgbInfo(bot));
-							Screen.prints(colorClassify(bot.sensors.getRGB(), LINE_WHITE, LINE_BROWN, LINE_BLUE) + "");
+							float[]rgb=bot.sensors.getRGB();
+							Screen.prints("r:" + rgb[0]);
+							Screen.prints("g:" + rgb[1]);
+							Screen.prints("b:" + rgb[2]);
+							Screen.prints(colorClassify(rgb, LINE_WHITE, LINE_BROWN, LINE_BLUE) + "");
 							//Screen.prints(colorIDToString(bot.sensors.getColorID()));
 							break;
 						case 1:

@@ -25,6 +25,8 @@ public class Bot {
 	
 	public static final float TRACK_WIDTH = 11.5f; 
 	public static final float WHEEL_DIAMETER = 3.5f;
+	
+	public static final int SENSOR_CONNECT_MAX_RETRIES = 4;
 
 	public EV3LargeRegulatedMotor lMotor;
 	public EV3LargeRegulatedMotor rMotor;
@@ -61,16 +63,20 @@ public class Bot {
 //		if(this.plugged.get(SensorPort.S4))
 //			this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
 		try {
-			this.colorS = new EV3ColorSensor(SensorPort.S1);
+			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.colorS==null;i++)
+				this.colorS = new EV3ColorSensor(SensorPort.S1);
 		}catch (Exception e){}
 		try {
-			this.touchS = new EV3TouchSensor(SensorPort.S2);
+			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.touchS==null;i++)
+				this.touchS = new EV3TouchSensor(SensorPort.S2);
 		}catch (Exception e){}
 		try {
-			this.gyroS = new EV3GyroSensor(SensorPort.S3);
+			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.gyroS==null;i++)
+				this.gyroS = new EV3GyroSensor(SensorPort.S3);
 		}catch (Exception e){}
 		try {
-			this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
+			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.ultraS==null;i++)
+				this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
 		}catch (Exception e){}
 
 		this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
@@ -84,7 +90,7 @@ public class Bot {
 //		Wheel[]wheels = new Wheel[] {lWheel, rWheel,};
 //		WheeledChassis chassis = new WheeledChassis(wheels, WheeledChassis.TYPE_DIFFERENTIAL);
 //		this.pilot = new MovePilot(chassis);
-		this.pilot = new DifferentialPilot(WHEEL_DIAMETER, TRACK_WIDTH, this.lMotor, this.rMotor);
+		//this.pilot = new DifferentialPilot(WHEEL_DIAMETER, TRACK_WIDTH, this.lMotor, this.rMotor);
 
 		//starts sensor thread
 		this.sensors.start();

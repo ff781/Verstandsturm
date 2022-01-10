@@ -3,12 +3,15 @@ package bot.nav.act;
 import bot.Bot;
 import bot.Driver;
 import util.state.*;
+import util.thrd.Timer;
 
 public class FiniteDriveAction extends NoSEAction {
 	
 	public float distance;
 	public float speed;
 	public float rotation;
+	
+	private Timer startTimer;
 
 	//defaults to driving forward
 	public FiniteDriveAction(float distance, float speed) {
@@ -24,7 +27,9 @@ public class FiniteDriveAction extends NoSEAction {
 
 	@Override
 	public void start(Bot bot) {
-		bot.driver.drive_(distance, speed, rotation, false);		
+		bot.driver.drive_(distance, speed, rotation, false);
+		startTimer = new Timer(1000);
+		startTimer.start();
 	}
 
 	@Override
@@ -34,7 +39,7 @@ public class FiniteDriveAction extends NoSEAction {
 
 	@Override
 	public boolean finished(Bot bot) {
-		return !bot.driver.isMoving();
+		return startTimer==null || !startTimer.isAlive() && !bot.driver.isMoving();
 	}
 
 }

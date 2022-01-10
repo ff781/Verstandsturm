@@ -14,5 +14,12 @@ public class CollUtil {
 		for(B a:as)r.add(a);
 		return r;
 	}
+	
+	public static <A> String toString(Collection<A> c) {
+		StringBuilder r = new StringBuilder();
+		for(A a : c)
+			r.append(a.toString());
+		return r.toString();
+	}
 
 }
