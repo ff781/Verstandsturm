@@ -62,22 +62,22 @@ public class Bot {
 //			this.gyroS = new EV3GyroSensor(SensorPort.S3);
 //		if(this.plugged.get(SensorPort.S4))
 //			this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
-		try {
-			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.colorS==null;i++)
+		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.colorS==null;i++)
+			try {
 				this.colorS = new EV3ColorSensor(SensorPort.S1);
-		}catch (Exception e){}
-		try {
-			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.touchS==null;i++)
+			}catch (Exception e){}
+		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.touchS==null;i++)
+			try {
 				this.touchS = new EV3TouchSensor(SensorPort.S2);
-		}catch (Exception e){}
-		try {
-			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.gyroS==null;i++)
+			}catch (Exception e){}
+		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.gyroS==null;i++)
+			try {
 				this.gyroS = new EV3GyroSensor(SensorPort.S3);
-		}catch (Exception e){}
-		try {
-			for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.ultraS==null;i++)
+			}catch (Exception e){}
+		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.ultraS==null;i++)
+			try {
 				this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
-		}catch (Exception e){}
+			}catch (Exception e){}
 
 		this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
 

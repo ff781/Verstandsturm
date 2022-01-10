@@ -15,6 +15,7 @@ import static bot.nav.ParcourConstants.*;
 public class Line {
 	
 	static State online;
+	static State rotToRFull; static State rotToLFull;
 	static State rotToR; static State rotToL;
 	static State rotRToL; static State rotLToR;
 	static State skipline;
@@ -86,6 +87,30 @@ public class Line {
 		@Override
 		public List<State> edgeTars() {
 			return CollUtil.listOf(State.END,rotToR,rotToL,obstacle);
+		}
+	}
+	public static class RotToRFullState extends State {
+		public RotToRFullState() {
+			super(
+					new FiniteTurnAction(-90,LINE_TURN_CROSSING_DETECTION_SPEED),
+					CollUtil.<Predicate<Bot>>listOf(
+							whiteBrown()
+							)
+					);
+			this.edgeFinalizingActions = new HashMap<>();
+			this.edgeFinalizingActions.put(0, SetLastSuccessAction.right());
+		}
+	}
+	public static class RotToLFullState extends State {
+		public RotToLFullState() {
+			super(
+					new FiniteTurnAction(-90,LINE_TURN_CROSSING_DETECTION_SPEED),
+					CollUtil.<Predicate<Bot>>listOf(
+							whiteBrown()
+							)
+					);
+			this.edgeFinalizingActions = new HashMap<>();
+			this.edgeFinalizingActions.put(0, SetLastSuccessAction.right());
 		}
 	}
 	public static class RotToRState extends State {
