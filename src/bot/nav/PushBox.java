@@ -17,10 +17,10 @@ public class PushBox {
 	}
 	
 	public void exec() {
-		boolean success = driveStraight();
-		if (!success) return;
-		success = findFirstField();
-		if (!success) return;
+		boolean success1 = driveStraight();
+		if (!success1) return;
+		//boolean success2 = findFirstField();
+		//if (!success2) return;
 		//success = pushBox();
 	}
 	
@@ -41,9 +41,11 @@ public class PushBox {
 		Screen.clear();
 		
 		while (Button.ESCAPE.isUp()) {
-			bot.driver.setUSPosition(95, 1, false);
+			bot.driver.setUSPosition(-95, 1, false);
 			startTacho = bot.lMotor.getTachoCount();
 			bot.driver.drive(10, 2, 1, true);
+			
+			float dist = distanceOptimal;
 			
 			while (distanceTraveled < goalDistance) {
 				Screen.clear();
@@ -57,7 +59,7 @@ public class PushBox {
 				//Screen.prints("Active: " + bot.sensors.usm.isActive());
 				//Screen.prints("ignore: " + bot.sensors.usm.isIgnorant());
 				
-				float dist = bot.sensors.getDistance();
+				dist = bot.sensors.getDistance();
 				
 				if (distancePrevious != 0.0f) {
 					distanceDirection = dist - distancePrevious;
@@ -72,11 +74,21 @@ public class PushBox {
 				distancePrevious = dist;
 				Screen.print(dist + "");
 				
+				boolean closeToTarget = distanceTraveled > goalDistance / 360 - 1;
+				
 				if (dist < distanceLower) {
-					bot.driver.forward(speed - correction, speed + correction);
+					int correction2 = correction;
+					if (closeToTarget) {
+						correction2 = correction / 2;
+					}
+					bot.driver.forward(speed - correction2, speed + correction2);
 					Screen.print("RIGHT");
 				} else if (dist > distanceHigher) {
-					bot.driver.forward(speed + correction, speed - correction);
+					int correction2 = correction;
+					if (closeToTarget) {
+						correction2 = correction / 2;
+					}
+					bot.driver.forward(speed + correction2, speed - correction2);
 					Screen.print("LEFT");
 				} else {
 					bot.driver.forward(speed, speed);
@@ -194,6 +206,8 @@ public class PushBox {
 	
 	private void stop() {
 		bot.driver.stop();
+		Screen.print("GYRO " + bot.sensors.getAngel());
+		Screen.sleep(3000);
 		Screen.clear();
 		bot.driver.setUSPosition(0, 1f, true);
 	}
