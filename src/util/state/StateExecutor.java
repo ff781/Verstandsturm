@@ -17,9 +17,15 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 	
 	boolean stop;
 	boolean running;
+	//whether to render information on brick screen
+	public boolean render;
+	//whether to record a state history, e.g. for debugging
+	boolean historian;
 	
 	State start;
 	State cur;
+	
+	List<State> history;
 	
 	public StateExecutor(State start) {
 		super();
@@ -38,27 +44,32 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 
 			@Override
 			public void exec() {
-				Screen.clear();
-				Screen.prints(((cur==null)?null:cur.getClass().getSimpleName()) + "");
-				//Screen.prints(rgbInfo(bot));
-				String color = "unknown";
-				switch(colorClassify(bot.sensors.getRGB(), ALL_COLORS))
-				{
-				case LINE_WHITE_I: color = "WHITE";break;
-				case LINE_BROWN_I: color = "BROWN";break;
-				case LINE_BLUE_I: color = "BLUE";break;
-				case LINE_FAKE_BLUE_I: color = "FAKE_BLUE";break;
-				}
-				Screen.prints(color + "");
-				for(String s : renderBuffer) {
-					if(s!=null) {
-						Screen.prints(s);
+				if(render) {
+					Screen.clear();
+					Screen.prints(((cur==null)?null:cur.getClass().getSimpleName()) + "");
+					//Screen.prints(rgbInfo(bot));
+					String color = "unknown";
+					switch(colorClassify(bot.sensors.getRGB(), ALL_COLORS))
+					{
+					case LINE_WHITE_I: color = "WHITE";break;
+					case LINE_BROWN_I: color = "BROWN";break;
+					case LINE_BLUE_I: color = "BLUE";break;
+					case LINE_FAKE_BLUE_I: color = "FAKE_BLUE";break;
+					}
+					Screen.prints(color + "");
+					for(String s : renderBuffer) {
+						if(s!=null) {
+							Screen.prints(s);
+						}
 					}
 				}
 			}};
 			renderClock.start();
 		try {
 			cur = start;
+			if(this.historian) {
+				this.history.add(cur);
+			}
 			if(cur == State.END) return;
 			running = true;
 			
@@ -74,6 +85,9 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 				
 				//proceeds with the next state
 				if(next!=null) {
+					if(this.historian) {
+						this.history.add(next);
+					}
 					if(!transitionByEnd) {
 						cur.action.stop(bot);
 					}
@@ -150,6 +164,17 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 			renderClock.stopp();
 		}
 		running = false;
+	}
+	
+	public void setHistorian(boolean a) {
+		if(this.historian != a) {
+			this.historian = a;
+			this.history = this.historian ? new ArrayList<State>() : null;
+		}
+	}
+
+	public List<State> getHistory() {
+		return this.history;
 	}
 	
 	public class ThreadFactory implements Function2<Bot,boolean[],Thread>{

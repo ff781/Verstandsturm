@@ -1,5 +1,8 @@
 package bot.nav.line;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.*;
 
 import bot.*;
@@ -29,9 +32,20 @@ public class Line {
 		return new StateExecutor(online);
 	}
 	
-	public static void exec(Bot bot) {
+	public static void exec(Bot bot, boolean debug) {
 		StateExecutor executor = Line.instantiate(bot);
+		executor.render = true;
+		executor.setHistorian(debug);
 		executor.exec(bot);
+		if(debug) {
+			String fn = "line_log.txt";
+			Path file = Paths.get(fn);
+			try {
+				Files.write(file, Arrays.asList(CollUtil.toString(executor.getHistory())), StandardCharsets.US_ASCII);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 	
 	public static class ObstacleState extends State {

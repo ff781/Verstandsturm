@@ -49,7 +49,7 @@ public class MainMenu extends TextMenu {
 		@Override
 		void exec(Bot bot) {
 			Screen.clear();
-			Line.exec(bot);
+			Line.exec(bot, true);
 		}},
     PUSH("Bully the box"){
 
