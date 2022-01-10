@@ -19,8 +19,8 @@ public class PushBox {
 	public void exec() {
 		boolean success1 = driveStraight();
 		if (!success1) return;
-		//boolean success2 = findFirstField();
-		//if (!success2) return;
+		boolean success2 = findFirstField();
+		if (!success2) return;
 		//success = pushBox();
 	}
 	
@@ -41,7 +41,7 @@ public class PushBox {
 		Screen.clear();
 		
 		while (Button.ESCAPE.isUp()) {
-			bot.driver.setUSPosition(-95, 1, false);
+			bot.driver.setUSPosition(95, 1, true);
 			startTacho = bot.lMotor.getTachoCount();
 			bot.driver.drive(10, 2, 1, true);
 			
@@ -60,39 +60,34 @@ public class PushBox {
 				//Screen.prints("ignore: " + bot.sensors.usm.isIgnorant());
 				
 				dist = bot.sensors.getDistance();
-				
-				if (distancePrevious != 0.0f) {
-					distanceDirection = dist - distancePrevious;
-					
-					if (distanceDirection < dDThreshold) {
-						Screen.print("GYRO " + bot.sensors.getAngel());
-						bot.sensors.resetAngel();
-						Screen.sleep(1000);
-					}
-				}
-				
-				distancePrevious = dist;
 				Screen.print(dist + "");
 				
-				boolean closeToTarget = distanceTraveled > goalDistance / 360 - 1;
+				boolean closeToTarget = distanceTraveled > goalDistance - 480;
 				
 				if (dist < distanceLower) {
 					int correction2 = correction;
 					if (closeToTarget) {
-						correction2 = correction / 2;
+						//correction2 = correction / 4;
+						bot.driver.forward(speed, speed);
+					} else {
+						bot.driver.forward(speed - correction2, speed + correction2);
 					}
-					bot.driver.forward(speed - correction2, speed + correction2);
 					Screen.print("RIGHT");
 				} else if (dist > distanceHigher) {
 					int correction2 = correction;
 					if (closeToTarget) {
-						correction2 = correction / 2;
+						//correction2 = correction / 4;
+						bot.driver.forward(speed, speed);
+					} else {
+						bot.driver.forward(speed + correction2, speed - correction2);
 					}
-					bot.driver.forward(speed + correction2, speed - correction2);
 					Screen.print("LEFT");
 				} else {
 					bot.driver.forward(speed, speed);
 					Screen.print("STRAIGT");
+					Screen.print("GYRO " + bot.sensors.getAngel());
+					bot.sensors.resetAngel();
+					Screen.sleep(1000);
 				}
 			}
 			
@@ -106,40 +101,38 @@ public class PushBox {
 	
 	private boolean findFirstField() {
 		int distanceTraveled = 0;
-		int goalDistance = 4 * 360;
+		int goalDistance = 6 * 360;
 		float usMeasured = bot.sensors.getDistance();
-		float usGoal = 0.65f;
+		float usGoal = 0.5f;
 		int startTacho;
 		int speed = 720;
 		int correction = speed / 4;
 		float whiteThreshold = 0.5f;
-		float angleThreshold = 20f;
+		float angleThreshold = 3.5f;
+		float targetAngle = -45f;
+		float closeToBoxDist = 0.05f;
+		int numWhiteSeen = 0;
 		
 		while (Button.ESCAPE.isUp()) {
 			Screen.clear();
 			
-			float angle = bot.sensors.getAngel();
-			while (Math.abs(angle % 360) > angleThreshold && Button.ESCAPE.isUp()) {
-				Screen.print(angle + "");
-				if (angle > 0) {
-					bot.driver.forward(speed / 2, -speed / 2);
-				} else {
-					bot.driver.forward(-speed / 2, speed / 2);
-				}
-				
-				angle = bot.sensors.getAngel();
-			}
+			bot.driver.setUSPosition(targetAngle, 1, true);
+			this.turnToAngle(0f, angleThreshold, speed / 4);
 			
-			stop();
-			return true;
-			
-			/*
 			while (usMeasured > usGoal) {
 				bot.driver.forward(speed, speed);
 				usMeasured = bot.sensors.getDistance();
 			}
 			
-			bot.driver.turn(-45, 2);
+			Screen.print("I C U");
+			
+			this.stop();
+			
+			/*
+			this.turnToAngle(targetAngle, angleThreshold, speed / 4);
+			
+			Screen.print("50 turned");
+			
 			startTacho = bot.lMotor.getTachoCount();
 			bot.driver.forward(speed, speed);
 			
@@ -148,19 +141,32 @@ public class PushBox {
 				distanceTraveled = bot.lMotor.getTachoCount() - startTacho;
 				
 				if (SLine.brownOrWhite(bot.sensors.getRGB()) < whiteThreshold) {
-					stop();
+					//stop();
 					Screen.print("COLOR");
-					Screen.sleep(1000);
+					numWhiteSeen++;
 					return true;
 				}
 				
 				if (bot.sensors.getTouch() == 1) {
 					stop();
 					Screen.print("TOUCH");
-					Screen.sleep(1000);
+					Screen.sleep(3000);
 					return true;
 				}
-			}*/
+				
+				if (bot.sensors.getDistance() < closeToBoxDist) {
+					stop();
+					Screen.print("DIST");
+					Screen.sleep(3000);
+					return true;
+				}
+			}
+			
+			Screen.print("MOTORS");
+			
+			*/
+			this.stop();
+			return false;
 		}
 		
 		stop();
@@ -205,10 +211,42 @@ public class PushBox {
 	}
 	
 	private void stop() {
-		bot.driver.stop();
-		Screen.print("GYRO " + bot.sensors.getAngel());
-		Screen.sleep(3000);
+		this.bot.driver.stop();
 		Screen.clear();
-		bot.driver.setUSPosition(0, 1f, true);
+		this.bot.driver.setUSPosition(0, 1f, true);
+	}
+	
+	private float getAdjustedAngle() {
+		float angle = this.bot.sensors.getAngel();
+		
+		if (angle < -180) {
+			angle = angle + 360;
+		}
+		if (angle > 180) {
+			angle = angle - 360;
+		}
+		
+		return angle;
+	}
+	
+	private void turnToAngle(float targetAngle, float angleThreshold, int speed) {
+		float angle = this.getAdjustedAngle();
+		
+		while (Math.abs(angle - targetAngle) > angleThreshold && Button.ESCAPE.isUp()) {
+			Screen.print(angle + "");
+			
+			if (Math.abs(180f - angle) < angleThreshold * 3) {
+				this.stop();
+				return;
+			}
+			
+			if (angle > targetAngle) {
+				this.bot.driver.forward(-speed, speed);
+			} else {
+				this.bot.driver.forward(speed, -speed);
+			}
+			
+			angle = this.getAdjustedAngle();
+		}
 	}
 }
