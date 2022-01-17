@@ -52,6 +52,7 @@ public class Driver {
 		Thread[]threads = new Thread[]{
 				threadL, threadR,
 		};
+		Meth.shuffle(threads);
 		for(Thread t:threads)t.start();
 		if(blocking) {
 			try{

@@ -45,19 +45,19 @@ public class ParcourConstants {
 	//#speed
 	
 	//speed at which the robot can detect crossing a line (~3cm wide)
-	public static final float LINE_CROSSING_DETECTION_SPEED = 2f;
+	public static final float LINE_CROSSING_DETECTION_SPEED = 2.5f;
 	
 	//speed at which the robot can detect crossing a line by turning (~3cm wide)
-	public static final float LINE_TURN_CROSSING_DETECTION_SPEED = 1.6f;
+	public static final float LINE_TURN_CROSSING_DETECTION_SPEED = 2.69f;
 	
 	//speed at which the robot can sufficiently accurately detect the edge of an obstacle while turning
 	public static final float LINE_TURN_EDGE_DETECTION_SPEED = 1f;
 
 	public static final float CRAWL_TOWARDS_OBSTACLE_EDGE_SPEED = 1f;
 
-	public static final float DEFAULT_DRIVE_SPEED = 5f;
+	public static final float DEFAULT_DRIVE_SPEED = 4f;
 	
-	public static final float DEFAULT_TURN_SPEED = 1f;
+	public static final float DEFAULT_TURN_SPEED = 3f;
 	
 	public static final float DEFAULT_USS_TURN_SPEED = 1f;
 	
@@ -129,7 +129,7 @@ public class ParcourConstants {
 	}
 	
 	public static final _Predicate<Bot> whiteBrown() {
-		return new FoundFirstLineColorFrom(LINE_WHITE,LINE_BROWN,LINE_FAKE_BLUE);
+		return new FoundFirstLineColorFrom(LINE_WHITE, LINE_BROWN, LINE_BLUE, LINE_FAKE_BLUE);
 	}
 	
 	public static final _Predicate<Bot> brownWhite() {
@@ -140,9 +140,9 @@ public class ParcourConstants {
 		return new FoundFirstLineColorFrom(LINE_BLUE,LINE_WHITE,LINE_BROWN,LINE_FAKE_BLUE);
 	}
 	
-	public static final float SKIP_LINE_JITTER_DISTANCE = 4;
-	public static final float SKIP_LINE_JITTER_SPEED = 1;
-	public static final float SKIP_LINE_JITTER_ANGEL = 7;
+	public static final float SKIP_LINE_JITTER_DISTANCE = 15.f;
+	public static final float SKIP_LINE_JITTER_SPEED = 2.6f;
+	public static final float SKIP_LINE_JITTER_ANGEL = 30.f;
 	
 	public static String rgbInfo(Bot bot) {
 		return rgbToString(bot.sensors.getRGB());

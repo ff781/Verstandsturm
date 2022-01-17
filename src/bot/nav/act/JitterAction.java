@@ -31,10 +31,15 @@ public class JitterAction extends ThreadBoundAction {
 		public void run() {
 			int i = 0;
 			while(!stop[0]) {
-				if(i%2==0) {
-					bot.driver.drive_(jitterDistance, jitterSpeed, jitterAngel);
-				} else {
-					bot.driver.drive_(jitterDistance, jitterSpeed, -jitterAngel);
+				if(i==0) {
+					bot.driver.drive_(jitterDistance * .88f, jitterSpeed, jitterAngel);
+				}
+				else {
+					if(i%2==0) {
+						bot.driver.drive_(jitterDistance, jitterSpeed, jitterAngel);
+					} else {
+						bot.driver.drive_(jitterDistance, jitterSpeed, -jitterAngel);
+					}
 				}
 				i++;
 			}
