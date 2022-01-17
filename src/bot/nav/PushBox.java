@@ -21,15 +21,16 @@ public class PushBox {
 		if (!success1) return;
 		boolean success2 = findFirstField();
 		if (!success2) return;
-		//success = pushBox();
+		boolean success3 = reposition();
+		return;
 	}
 	
 	private boolean driveStraight() {
 		int distanceTraveled = 0;
 		int goalDistance = 9 * 360;
 		int startTacho;
-		float distanceOptimal = 0.23f;
-		float distanceTolerance = 0.04f;
+		float distanceOptimal = 0.17f;
+		float distanceTolerance = 0.03f;
 		float distanceLower = distanceOptimal - distanceTolerance;
 		float distanceHigher = distanceOptimal + distanceTolerance;
 		float distancePrevious = 0.0f;
@@ -101,37 +102,47 @@ public class PushBox {
 	
 	private boolean findFirstField() {
 		int distanceTraveled = 0;
-		int goalDistance = 6 * 360;
+		int goalDistance = 4 * 360;
 		float usMeasured = bot.sensors.getDistance();
-		float usGoal = 0.5f;
+		float usGoal = 0.4f;
 		int startTacho;
 		int speed = 720;
 		int correction = speed / 4;
 		float whiteThreshold = 0.5f;
 		float angleThreshold = 3.5f;
-		float targetAngle = -45f;
-		float closeToBoxDist = 0.05f;
+		float targetAngle1 = -45f;
+		float closeToBoxDist = 0.2f;
 		int numWhiteSeen = 0;
+		int numTouched = 0;
 		
 		while (Button.ESCAPE.isUp()) {
 			Screen.clear();
 			
-			bot.driver.setUSPosition(targetAngle, 1, true);
-			this.turnToAngle(0f, angleThreshold, speed / 4);
+			bot.driver.setUSPosition(-90f, 1, false);
+			//this.turnToAngle(0f, angleThreshold, speed / 4);
+			bot.driver.drive_(2, speed, 90, true);
+			
+			startTacho = bot.lMotor.getTachoCount();
+			
+			bot.driver.forward(speed, speed);
 			
 			while (usMeasured > usGoal) {
-				bot.driver.forward(speed, speed);
 				usMeasured = bot.sensors.getDistance();
 			}
 			
 			Screen.print("I C U");
+			this.bot.driver.stop();
+			float boxDist = bot.sensors.getDistance();
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			
-			this.stop();
+			// drive a bit back
+			Screen.print((5f + boxDist * 10f) + "");
+			Screen.print(distanceTraveled + "");
+			Screen.sleep(2000);
+			bot.driver.drive_(5f + boxDist * 10f, speed, -180);
 			
-			/*
-			this.turnToAngle(targetAngle, angleThreshold, speed / 4);
-			
-			Screen.print("50 turned");
+			//this.turnToAngle(targetAngle1, angleThreshold, speed / 4);
+			bot.driver.drive_(4.5f, speed, -90, true);
 			
 			startTacho = bot.lMotor.getTachoCount();
 			bot.driver.forward(speed, speed);
@@ -142,69 +153,81 @@ public class PushBox {
 				
 				if (SLine.brownOrWhite(bot.sensors.getRGB()) < whiteThreshold) {
 					//stop();
-					Screen.print("COLOR");
 					numWhiteSeen++;
-					return true;
+					Screen.print("COLOR " + numWhiteSeen);
+					Screen.sleep(2000);
+					//return true;
 				}
 				
-				if (bot.sensors.getTouch() == 1) {
-					stop();
+				if (bot.sensors.isTouched()) {
+					numTouched++;
 					Screen.print("TOUCH");
-					Screen.sleep(3000);
-					return true;
+					Screen.sleep(1000);
 				}
-				
-				if (bot.sensors.getDistance() < closeToBoxDist) {
+				/*
+				if (numWhiteSeen >= 1 && numTouched == 0 && bot.sensors.getDistance() > 0.35f) {
 					stop();
+					Screen.print("FAILED");
+					Screen.sleep(2000);
+					return false;
+				}
+				*/
+				if (bot.sensors.getDistance() < closeToBoxDist) {
+					this.bot.driver.stop();
 					Screen.print("DIST");
-					Screen.sleep(3000);
+					Screen.sleep(2000);
 					return true;
 				}
 			}
 			
 			Screen.print("MOTORS");
 			
-			*/
-			this.stop();
-			return false;
+			this.bot.driver.stop();
+			return true;
 		}
 		
-		stop();
+		this.bot.driver.stop();
 		return false;
 	}
 	
-	private boolean pushBox() {
-		int distanceTraveled = 0;
-		int goalDistance = 5 * 360;
-		int startTacho;
-		int speed = 720;
-		int correction = speed / 4;
-		float whiteThreshold = 0.5f;
-		int whiteFound = 0;
-		int whiteGoal = 2;
-		boolean onWhite = false;
+	private boolean reposition() {
+		Screen.clear();
 		
-		while (Button.ESCAPE.isUp()) {
-			Screen.clear();
-			
-			startTacho = bot.lMotor.getTachoCount();
-			bot.driver.forward(speed, speed);
-			
-			while (bot.sensors.isTouched() && whiteFound < whiteGoal) {
-				Screen.clear();
-				distanceTraveled = bot.lMotor.getTachoCount() - startTacho;
-				
-				if (!onWhite && SLine.brownOrWhite(bot.sensors.getRGB()) < whiteThreshold) {
-					Sound.beep();
-					onWhite = true;
-					whiteFound++;
-				}
-				
-				if (onWhite && SLine.brownOrWhite(bot.sensors.getRGB()) > whiteThreshold) {
-					onWhite = false;
-				}
+		int speed = 720;
+		
+		// push box a bit more
+		bot.driver.drive_(4, speed, 60);
+		bot.driver.drive_(4, speed, -60);
+		
+		// look left for wall
+		bot.driver.setUSPosition(0, 1, false);
+		
+		// drive back
+		bot.driver.drive_(5, speed, -180);
+		
+		// turn right in place
+		bot.driver.drive_(9, speed, -90);
+		
+		bot.driver.forward(speed, speed);
+		
+		// drive straight into wall
+		while(Button.ESCAPE.isUp()) {
+			if (bot.sensors.isTouched()) {
+				this.bot.driver.stop();
+				break;
 			}
 		}
+		
+		// back
+		bot.driver.drive_(5, speed, -180);
+		
+		// TODO: check distance with US sensor
+		
+		// turn 90 deg right
+		bot.driver.drive_(14, speed, -90);
+		
+		// drive (straight)
+		bot.driver.drive_(50, speed, 0, true);
 		
 		stop();
 		return false;
@@ -233,18 +256,21 @@ public class PushBox {
 		float angle = this.getAdjustedAngle();
 		
 		while (Math.abs(angle - targetAngle) > angleThreshold && Button.ESCAPE.isUp()) {
-			Screen.print(angle + "");
-			
 			if (Math.abs(180f - angle) < angleThreshold * 3) {
 				this.stop();
 				return;
 			}
 			
 			if (angle > targetAngle) {
+				Screen.print("L " + (angle - targetAngle));
+				Screen.sleep(500);
 				this.bot.driver.forward(-speed, speed);
 			} else {
+				Screen.print("R " + (angle - targetAngle));
+				Screen.sleep(500);
 				this.bot.driver.forward(speed, -speed);
 			}
+			Screen.sleep(500);
 			
 			angle = this.getAdjustedAngle();
 		}
