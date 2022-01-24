@@ -1,13 +1,15 @@
 package bot;
 
+import bot.sen.SensorThread;
+import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.*;
-
 import util.meth.Meth;
 
 /*
  * degrees are in degrees, positive is counterclockwise="left"
  * linear speed is in 3cm/s
- * rotation speed is 36°/s; 2.5s/full rotation
+ * rotation speed is 36Â°/s; 2.5s/full rotation
  * distance is in 1cm
  * error is on average ~.07, worst case ~.15
  */
@@ -31,12 +33,17 @@ public class Driver {
     
     //scaling constant for drive distance
     public static final float driveFactor = 36 / turnDegFactorL;
+    
+    // saving US position (degrees). Assumption: start at 0 (forward facing)
+    // negative = left, positive = right
+    private float usPosition = 0;
 
 	Bot bot;
 
 	public Driver(Bot bot) {
 		this.bot = bot;
 	}
+	
 
 	/*
 	 * turns the robot
@@ -73,12 +80,44 @@ public class Driver {
 		}
 	}
 	
-	public void directionChange(float y) {
+	public void turnGyro(float deg, float speed){
+		this.bot.sensors.resetAngel();
+		float dir;
+		if (deg >= 0f) {
+			turn(200, speed, false);
+			System.out.println("left");
+		}
+		else {
+			System.out.println("right");
+			turn(-200, speed, false);
+		}
+		dir = (deg * 0.81f);
+		System.out.println(dir);
+		while(Button.ESCAPE.isUp()) {
+			if (dir >= 0) {
+				if(this.bot.sensors.getAngel() >= dir) {
+					System.out.println("stop");
+					stop();
+					break;
+				}
+			}
+			else {
+				if(this.bot.sensors.getAngel() <= dir) {
+					System.out.println("stop");
+					stop();
+					break;
+				}
+			}
+		}
+		LCD.clear();
+	}
+	
+	
+	public void directionChange(int y) {
 		int lSpeed = this.bot.lMotor.getSpeed();
 		int rSpeed = this.bot.rMotor.getSpeed();
 		
-		this.bot.lMotor.setSpeed(lSpeed + y);
-		this.bot.rMotor.setSpeed(rSpeed - y);
+		forward(lSpeed + y, rSpeed - y);
 	}
 
 	/*
@@ -162,6 +201,25 @@ public class Driver {
 		}
 	}
 	
+	
+	public float getUSPosition() {
+		return this.usPosition;
+	}
+	
+	public void setUSPosition(float goalPos, float speed, boolean blocking) {
+		assert goalPos >= -110f;
+		assert goalPos <= 110f;
+		
+		float difference = goalPos - usPosition;
+		
+		turnUS(-difference, speed, blocking);
+		
+		usPosition = goalPos;
+		
+		if (usPosition > 90) usPosition = 90;
+		if (usPosition < -90) usPosition = -90;
+	}
+	
 	/*
 	 * turns ultrasonic(US) sensor
 	 * @param deg: degrees
@@ -172,6 +230,7 @@ public class Driver {
 		this.turnUS(deg, speed, BLOCKING_DEFAULT);
 	}
 	public void turnUS(float deg, float speed, boolean blocking){
+		usPosition += deg;
 		deg *= -1;
 		Thread[]threads = new Thread[]{
 				new RotateThread(this.bot.rotor, deg*turnDegFactorUSM, speed*turnSpeedFactorUSM),
@@ -232,6 +291,22 @@ public class Driver {
 		bot.rMotor.forward();
 	}
 	
+	public void forward(int lSpeed, int rSpeed) {
+		bot.lMotor.setSpeed(lSpeed);
+		bot.rMotor.setSpeed(rSpeed);
+		if (lSpeed >= 0) {
+			bot.lMotor.forward();
+		} else {
+			bot.lMotor.backward();
+		}
+		
+		if (rSpeed >= 0) {
+			bot.rMotor.forward();
+		} else {
+			bot.rMotor.backward();
+		}
+	}
+	
 	public void stop() {
 		bot.lMotor.stop();
 		bot.rMotor.stop();
@@ -251,6 +326,38 @@ public class Driver {
 		public void run(){
 			motor.setSpeed(speed);
 			motor.rotate((int)rad);
+		}
+	}
+	
+	static class GyroThread extends Thread {
+
+		BaseRegulatedMotor motor;
+		float rad;
+		float speed;
+		SensorThread sensor;
+
+		public GyroThread(BaseRegulatedMotor motor, float rad, float speed, SensorThread sensor) {
+			this.motor = motor;
+			this.rad = rad;
+			this.speed = speed;
+			this.sensor = sensor;
+		}
+		public void run(){
+			motor.setSpeed(speed);
+			float angel = sensor.getAngel();
+			if(rad >= 0) {
+				motor.rotate(350, true);
+			}
+			else {
+				motor.rotate(-350, true);
+			}
+
+			while(true) {
+				if(sensor.getAngel() - angel >= rad) {
+					motor.stop();
+					break;
+				}
+			}
 		}
 	}
 
