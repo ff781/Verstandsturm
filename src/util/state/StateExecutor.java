@@ -50,7 +50,7 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 			public void exec() {
 				if(render) {
 					Screen.clear();
-					Screen.prints(((cur==null)?null:cur.getClass().getSimpleName()) + "");
+					Screen.prints(((cur==null)?null:cur.getName()) + "");
 					//Screen.prints(rgbInfo(bot));
 					String color = "unknown";
 //					switch(colorClassify(bot.sensors.getRGB(), ALL_COLORS))
