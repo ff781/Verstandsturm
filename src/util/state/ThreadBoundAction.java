@@ -25,14 +25,15 @@ public class ThreadBoundAction implements Action{
 	@Override
 	public void start(Bot bot) {
 		assert finished(bot);
-		thread = this.threadFactory.exec(bot,stop);
+		this.stop[0] = false;
+		thread = this.threadFactory.exec(bot,this.stop);
 		thread.setDaemon(true);
 		thread.start();
 	}
 
 	@Override
 	public void stop(Bot bot) {
-		stop[0] = true;
+		this.stop[0] = true;
 		try {
 			thread.join();
 		} catch (InterruptedException e) {

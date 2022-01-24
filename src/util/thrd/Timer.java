@@ -6,6 +6,7 @@ public class Timer extends Thread {
 	
 	public Timer(long millis) {
 		this.millis = millis;
+		this.setDaemon(true);
 	}
 	
 	public void run() {

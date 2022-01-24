@@ -41,12 +41,24 @@ public class Meth{
 			swap(a, i, r);
 		}
 	}
+	public static final <A> void shuffle(A[]a) {
+		int size = a.length;
+		for(int i=size-1;i>0;i--){
+			int r = (int)(Math.random()*i);
+			swap(a, i, r);
+		}
+	}
 
 	//swaps two elements in a list
 	public static final <A> void swap(List<A> a,int l, int r) {
 		A tmp = a.get(l);
 		a.set(l, a.get(r));
 		a.set(r, tmp);
+	}
+	public static final <A> void swap(A[]a,int l,int r) {
+		A tmp = a[l];
+		a[l] = a[r];
+		a[r] = tmp;
 	}
 
 	//creates int range from start(incl) to stop(excl)
