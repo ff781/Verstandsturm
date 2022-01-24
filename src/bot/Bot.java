@@ -8,7 +8,6 @@ import lejos.hardware.port.*;
 import lejos.hardware.sensor.*;
 import lejos.hardware.device.*;
 
-import lejos.robotics.chassis.*;
 import lejos.robotics.navigation.*;
 
 import java.util.*;

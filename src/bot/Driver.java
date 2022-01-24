@@ -39,7 +39,6 @@ public class Driver {
     
     // saving US position (degrees). Assumption: start at 0 (forward facing)
     // negative = left, positive = right
-    private float usPosition = 0;
 
 	Bot bot;
 
@@ -166,23 +165,6 @@ public class Driver {
 	}
 	
 	
-	public float getUSPosition() {
-		return this.usPosition;
-	}
-	
-	public void setUSPosition(float goalPos, float speed, boolean blocking) {
-		assert goalPos >= -110f;
-		assert goalPos <= 110f;
-		
-		float difference = goalPos - usPosition;
-		
-		turnUS(-difference, speed, blocking);
-		
-		usPosition = goalPos;
-		
-		if (usPosition > 90) usPosition = 90;
-		if (usPosition < -90) usPosition = -90;
-	}
 	
 	/*
 	 * turns ultrasonic(US) sensor
@@ -250,22 +232,6 @@ public class Driver {
 		bot.rMotor.setSpeed(720);
 		bot.lMotor.forward();
 		bot.rMotor.forward();
-	}
-	
-	public void forward(int lSpeed, int rSpeed) {
-		bot.lMotor.setSpeed(lSpeed);
-		bot.rMotor.setSpeed(rSpeed);
-		if (lSpeed >= 0) {
-			bot.lMotor.forward();
-		} else {
-			bot.lMotor.backward();
-		}
-		
-		if (rSpeed >= 0) {
-			bot.rMotor.forward();
-		} else {
-			bot.rMotor.backward();
-		}
 	}
 	
 	public void stop() {
