@@ -39,7 +39,7 @@ public class Screen {
   }
   
   public static void prints(String s) {
-	LCD.drawString(s, x, y);
+	LCD.drawString(s, x, y++);
   }
   
   public static void sout_println(String s) {

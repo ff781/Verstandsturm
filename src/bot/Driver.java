@@ -36,6 +36,10 @@ public class Driver {
     
     //scaling constant for drive distance
     public static final float driveFactor = 36 / turnDegFactorL;
+    
+    // saving US position (degrees). Assumption: start at 0 (forward facing)
+    // negative = left, positive = right
+    private float usPosition = 0;
 
 	Bot bot;
 
@@ -106,12 +110,11 @@ public class Driver {
 	}
 	
 	
-	public void directionChange(float y) {
+	public void directionChange(int y) {
 		int lSpeed = this.bot.lMotor.getSpeed();
 		int rSpeed = this.bot.rMotor.getSpeed();
 		
-		this.bot.lMotor.setSpeed(lSpeed + y);
-		this.bot.rMotor.setSpeed(rSpeed - y);
+		forward(lSpeed + y, rSpeed - y);
 	}
 
 	/*
@@ -162,6 +165,25 @@ public class Driver {
 		}
 	}
 	
+	
+	public float getUSPosition() {
+		return this.usPosition;
+	}
+	
+	public void setUSPosition(float goalPos, float speed, boolean blocking) {
+		assert goalPos >= -110f;
+		assert goalPos <= 110f;
+		
+		float difference = goalPos - usPosition;
+		
+		turnUS(-difference, speed, blocking);
+		
+		usPosition = goalPos;
+		
+		if (usPosition > 90) usPosition = 90;
+		if (usPosition < -90) usPosition = -90;
+	}
+	
 	/*
 	 * turns ultrasonic(US) sensor
 	 * @param deg: degrees
@@ -172,6 +194,7 @@ public class Driver {
 		this.turnUS(deg, speed, BLOCKING_DEFAULT);
 	}
 	public void turnUS(float deg, float speed, boolean blocking){
+		usPosition += deg;
 		deg *= -1;
 		Thread[]threads = new Thread[]{
 				new RotateThread(this.bot.rotor, deg*turnDegFactorUSM, speed*turnSpeedFactorUSM),
@@ -227,6 +250,22 @@ public class Driver {
 		bot.rMotor.setSpeed(720);
 		bot.lMotor.forward();
 		bot.rMotor.forward();
+	}
+	
+	public void forward(int lSpeed, int rSpeed) {
+		bot.lMotor.setSpeed(lSpeed);
+		bot.rMotor.setSpeed(rSpeed);
+		if (lSpeed >= 0) {
+			bot.lMotor.forward();
+		} else {
+			bot.lMotor.backward();
+		}
+		
+		if (rSpeed >= 0) {
+			bot.rMotor.forward();
+		} else {
+			bot.rMotor.backward();
+		}
 	}
 	
 	public void stop() {
