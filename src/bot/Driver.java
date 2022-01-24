@@ -86,20 +86,18 @@ public class Driver {
 		dir = (deg * 0.84f);
 		while(Button.ESCAPE.isUp()) {
 			System.out.println(this.bot.lMotor.getTachoCount() - tacho);
-			if(this.bot.lMotor.getTachoCount() - tacho >= tachoLimit) {
+			if(this.bot.lMotor.getTachoCount() - tacho >= tachoLimit && dir >= 0) {
 				stop();
 				break;
 			}
 			else if(dir >= 0) {
 				if(this.bot.sensors.getAngel() - origin >= dir) {
-					System.out.println("stop");
 					stop();
 					break;
 				}
 			}
 			else{
 				if(this.bot.sensors.getAngel() - origin <= dir) {
-					System.out.println("stop");
 					stop();
 					break;
 				}

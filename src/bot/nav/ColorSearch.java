@@ -77,25 +77,25 @@ public class ColorSearch {
 					this.bot.driver.turnGyro(90f, 1f);
 					this.bot.driver.drive(10f, 4f, -1);
 					this.bot.driver.forward();
-					cnt += 2;
+					cnt += 2;		
 				}
 				//then start checking inside the square
 				else {
 					if(cnt % 2 == 0) {
 						this.bot.driver.drive(4f, 4f, -1);
 						this.bot.driver.turnGyro(90f, 1f);
-						this.bot.driver.drive(9f, 4f, 1);
+						this.bot.driver.drive(8f, 4f, 1);
 						this.bot.driver.turnGyro(90f, 1f);
-						this.bot.driver.drive(10f, 4f, -1);
+						this.bot.driver.drive(15f, 4f, -1);
 						this.bot.driver.forward();
 						cnt++;
 					}
 					else {
 						this.bot.driver.drive(4f, 4f, -1);
 						this.bot.driver.turnGyro(-90f, 1f);
-						this.bot.driver.drive(9f, 4f, 1);
+						this.bot.driver.drive(8f, 4f, 1);
 						this.bot.driver.turnGyro(-90f, 1f);
-						this.bot.driver.drive(10f, 4f, -1);
+						this.bot.driver.drive(15f, 4f, -1);
 						this.bot.driver.forward();
 						cnt++;
 					}

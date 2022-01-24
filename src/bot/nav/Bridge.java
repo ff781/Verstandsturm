@@ -35,7 +35,7 @@ public class Bridge {
 		
 		this.bot.driver.turnGyro(90, 2);
 		
-		this.bot.driver.drive(135, 4, 1, true);
+		this.bot.driver.drive(125, 4, 1, true);
 		
 		this.bot.driver.turnGyro(90, 2);
 		
