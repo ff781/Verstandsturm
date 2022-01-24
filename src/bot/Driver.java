@@ -261,17 +261,10 @@ public class Driver {
 		this.driveStop(HARD_DEFAULT);
 	}
 	public void driveStop(final boolean hard) {
-		class DriveStopThread extends Thread {
-			public void run() {
-				if (hard)
-					bot.rMotor.stop();
-				else
-					bot.rMotor.flt();
-			}
-		}
+		
 		Thread[]threads = new Thread[] {
-				new DriveStopThread(),
-				new DriveStopThread(),
+				new DriveStopThread(this.bot.rMotor, hard),
+				new DriveStopThread(this.bot.lMotor, hard),
 		};
 		for(Thread t:threads)t.start();
 		try{
@@ -279,6 +272,20 @@ public class Driver {
 		}catch(Exception e){
 			throw new RuntimeException(e);
 		};
+	}
+	static class DriveStopThread extends Thread {
+		BaseRegulatedMotor motor;
+		boolean hard;
+		public DriveStopThread(BaseRegulatedMotor motor, boolean hard) {
+			this.motor = motor;
+			this.hard = hard;
+		}
+		public void run() {
+			if (hard)
+				this.motor.stop();
+			else
+				this.motor.flt();
+		}
 	}
 	public boolean isMoving() {
 		return this.bot.lMotor.isMoving() || this.bot.rMotor.isMoving();
