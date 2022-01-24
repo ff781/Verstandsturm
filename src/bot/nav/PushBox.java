@@ -19,7 +19,7 @@ public class PushBox {
 	public void exec() {
 		boolean success1 = driveStraight();
 		if (!success1) return;
-		boolean success2 = findFirstField();
+		boolean success2 = pushBox();
 		if (!success2) return;
 		boolean success3 = reposition();
 		return;
@@ -27,9 +27,9 @@ public class PushBox {
 	
 	private boolean driveStraight() {
 		int distanceTraveled = 0;
-		int goalDistance = 9 * 360;
+		int goalDistance = 9 * 360 + 180;
 		int startTacho;
-		float distanceOptimal = 0.17f;
+		float distanceOptimal = 0.26f;
 		float distanceTolerance = 0.03f;
 		float distanceLower = distanceOptimal - distanceTolerance;
 		float distanceHigher = distanceOptimal + distanceTolerance;
@@ -38,6 +38,7 @@ public class PushBox {
 		float dDThreshold = 0.005f;
 		int speed = 720;
 		int correction = speed / 4;
+		float whiteThreshold = 0.5f;
 		
 		Screen.clear();
 		
@@ -54,8 +55,15 @@ public class PushBox {
 				
 				if (bot.sensors.getTouch() == 1) {
 					stop();
+					Screen.print("Touch");
 					return true;
 				}
+				/*
+				if (SLine.brownOrWhite(bot.sensors.getRGB()) < whiteThreshold) {
+					stop();
+					Screen.print("Color");
+					return true;
+				}*/
 				
 				//Screen.prints("Active: " + bot.sensors.usm.isActive());
 				//Screen.prints("ignore: " + bot.sensors.usm.isIgnorant());
@@ -100,11 +108,11 @@ public class PushBox {
 		return false;
 	}
 	
-	private boolean findFirstField() {
+	private boolean pushBox() {
 		int distanceTraveled = 0;
-		int goalDistance = 4 * 360;
+		int goalDistance = 7 * 360;
 		float usMeasured = bot.sensors.getDistance();
-		float usGoal = 0.4f;
+		float usGoal = 0.45f;
 		int startTacho;
 		int speed = 720;
 		int correction = speed / 4;
@@ -114,37 +122,60 @@ public class PushBox {
 		float closeToBoxDist = 0.2f;
 		int numWhiteSeen = 0;
 		int numTouched = 0;
+		boolean stoppedForTouch = false;
 		
 		while (Button.ESCAPE.isUp()) {
 			Screen.clear();
 			
-			bot.driver.setUSPosition(-90f, 1, false);
-			//this.turnToAngle(0f, angleThreshold, speed / 4);
-			bot.driver.drive_(2, speed, 90, true);
+			// look right
+			bot.driver.setUSPosition(targetAngle1, 1, true);
+			
+			// correct orientation
+			bot.driver.drive_(2.1f, speed, 90, true);
 			
 			startTacho = bot.lMotor.getTachoCount();
 			
-			bot.driver.forward(speed, speed);
-			
-			while (usMeasured > usGoal) {
-				usMeasured = bot.sensors.getDistance();
+			if (usMeasured > usGoal) {
+				// drive forward ...
+				bot.driver.forward(speed / 2, speed / 2);
+				
+				// ... until box is seen
+				while (usMeasured > usGoal && !bot.sensors.isTouched()) {
+					usMeasured = bot.sensors.getDistance();
+				}
 			}
 			
+			if (bot.sensors.isTouched()) stoppedForTouch = true;
+			bot.driver.stop();
+			
 			Screen.print("I C U");
-			this.bot.driver.stop();
-			float boxDist = bot.sensors.getDistance();
-			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			
-			// drive a bit back
-			Screen.print((5f + boxDist * 10f) + "");
-			Screen.print(distanceTraveled + "");
-			Screen.sleep(2000);
-			bot.driver.drive_(5f + boxDist * 10f, speed, -180);
+			if (stoppedForTouch) {
+				// stop and drive forward a bit more
+				bot.driver.drive_(2f, speed, -0, true);
+				
+				// try to turn exactly to target angle
+				bot.driver.drive_(6f, speed, -90, true);
+			} else {
+				// try to turn to target Angle
+				bot.driver.drive_(7f, speed, -80, true);
+				
+				// drive forward ...
+				bot.driver.forward(speed / 2, speed / 2);
+				
+				// ... until box is touched
+				while (!bot.sensors.isTouched()) {}
+				
+				bot.driver.stop();
+				
+				// turn smoothly
+				bot.driver.drive_(8f, speed, 45, true);
+			}
 			
-			//this.turnToAngle(targetAngle1, angleThreshold, speed / 4);
-			bot.driver.drive_(4.5f, speed, -90, true);
-			
+			// drive until box against wall
 			startTacho = bot.lMotor.getTachoCount();
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+			bot.driver.setUSPosition(-90, 1, false);
 			bot.driver.forward(speed, speed);
 			
 			while (distanceTraveled < goalDistance) {
@@ -196,11 +227,13 @@ public class PushBox {
 		int speed = 720;
 		
 		// push box a bit more
-		bot.driver.drive_(4, speed, 60);
-		bot.driver.drive_(4, speed, -60);
+		bot.driver.drive_(10, speed, -80);
+		bot.driver.drive_(10, speed, 0);
+		bot.driver.drive_(15, speed, 80);
+		bot.driver.drive_(10, speed, 0);
 		
-		// look left for wall
-		bot.driver.setUSPosition(0, 1, false);
+		// look right for wall
+		bot.driver.setUSPosition(-90, 1, false);
 		
 		// drive back
 		bot.driver.drive_(5, speed, -180);
@@ -208,7 +241,7 @@ public class PushBox {
 		// turn right in place
 		bot.driver.drive_(9, speed, -90);
 		
-		bot.driver.forward(speed, speed);
+		bot.driver.drive_(15, speed, 30, false);
 		
 		// drive straight into wall
 		while(Button.ESCAPE.isUp()) {
@@ -218,16 +251,31 @@ public class PushBox {
 			}
 		}
 		
-		// back
-		bot.driver.drive_(5, speed, -180);
+		// straigthen out
+		bot.driver.drive_(5, speed, -45);
+		bot.driver.drive_(5, speed, 45);
+		bot.driver.drive_(5, speed, 0);
 		
-		// TODO: check distance with US sensor
+		// back
+		bot.driver.drive_(10, speed, -180, false);
+		
+		while(bot.sensors.getDistance() < 0.65) {
+			
+		}
+		
+		bot.driver.stop();
+		
+		bot.driver.setUSPosition(0, speed, true);
 		
 		// turn 90 deg right
 		bot.driver.drive_(14, speed, -90);
 		
 		// drive (straight)
-		bot.driver.drive_(50, speed, 0, true);
+		bot.driver.drive_(60, speed, 0, false);
+		
+		while(bot.sensors.getDistance() < 0.4) {
+			
+		}
 		
 		stop();
 		return false;
