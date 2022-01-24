@@ -22,12 +22,14 @@ public class PushBox {
 		boolean success2 = pushBox();
 		if (!success2) return;
 		boolean success3 = reposition();
+		if (!success3) return;
+		boolean success4 = lastStraight();
 		return;
 	}
 	
 	private boolean driveStraight() {
 		int distanceTraveled = 0;
-		int goalDistance = 9 * 360 + 180;
+		int goalDistance = 9 * 360;
 		int startTacho;
 		float distanceOptimal = 0.26f;
 		float distanceTolerance = 0.03f;
@@ -127,14 +129,20 @@ public class PushBox {
 		while (Button.ESCAPE.isUp()) {
 			Screen.clear();
 			
-			// look right
-			bot.driver.setUSPosition(targetAngle1, 1, true);
-			
 			// correct orientation
 			bot.driver.drive_(2.1f, speed, 90, true);
 			
+			// look ahead
+			bot.driver.setUSPosition(0, 1, true);
+			if (bot.sensors.getDistance() < 0.3) {
+				bot.driver.setUSPosition(-90, speed, true);
+			} else {
+				bot.driver.setUSPosition(targetAngle1, 1, true);
+			}
+			
 			startTacho = bot.lMotor.getTachoCount();
 			
+			usMeasured = bot.sensors.getDistance();
 			if (usMeasured > usGoal) {
 				// drive forward ...
 				bot.driver.forward(speed / 2, speed / 2);
@@ -152,13 +160,16 @@ public class PushBox {
 			
 			if (stoppedForTouch) {
 				// stop and drive forward a bit more
-				bot.driver.drive_(2f, speed, -0, true);
+				//bot.driver.drive_(2f, speed, -0, true);
 				
 				// try to turn exactly to target angle
-				bot.driver.drive_(6f, speed, -90, true);
-			} else {
-				// try to turn to target Angle
 				bot.driver.drive_(7f, speed, -80, true);
+			} else {
+				// drive a bit forward
+				bot.driver.drive_(2f, speed, -10f, true);
+				
+				// try to turn right to target Angle
+				bot.driver.drive_(7f, speed, -100, true);
 				
 				// drive forward ...
 				bot.driver.forward(speed / 2, speed / 2);
@@ -168,8 +179,8 @@ public class PushBox {
 				
 				bot.driver.stop();
 				
-				// turn smoothly
-				bot.driver.drive_(8f, speed, 45, true);
+				// turn smoothly left
+				bot.driver.drive_(3f, speed, 60, true);
 			}
 			
 			// drive until box against wall
@@ -217,68 +228,108 @@ public class PushBox {
 			return true;
 		}
 		
-		this.bot.driver.stop();
+		stop();
 		return false;
 	}
 	
 	private boolean reposition() {
-		Screen.clear();
-		
 		int speed = 720;
 		
-		// push box a bit more
-		bot.driver.drive_(10, speed, -80);
-		bot.driver.drive_(10, speed, 0);
-		bot.driver.drive_(15, speed, 80);
-		bot.driver.drive_(10, speed, 0);
+		Screen.clear();
+		Screen.print("Reposition");
 		
-		// look right for wall
-		bot.driver.setUSPosition(-90, 1, false);
+		// push box a bit more
+		bot.driver.drive_(10, speed, -90, true);
+		//bot.driver.drive_(10, speed, 0, true);
+		bot.driver.drive_(15, speed, 90, true);
+		//bot.driver.drive_(10, speed, 0, true);
+		
+		Screen.print("DONE with pushing");
+		bot.driver.stop();
 		
 		// drive back
-		bot.driver.drive_(5, speed, -180);
+		bot.driver.drive_(10, speed, -180, true);
 		
 		// turn right in place
-		bot.driver.drive_(9, speed, -90);
+		bot.driver.drive_(10, speed, -90, true);
 		
-		bot.driver.drive_(15, speed, 30, false);
+		bot.driver.stop();
+		return true;
+	}
+	
+	private boolean lastStraight() {
+		float goalDistance = 5 * 360;
+		float distanceTraveled = 0f;
+		float distanceOptimal = 0.35f;
+		float distanceTolerance = 0.03f;
+		float distanceLower = distanceOptimal - distanceTolerance;
+		float distanceHigher = distanceOptimal + distanceTolerance;
+		int speed = 720;
+		int correction = speed / 4;
 		
-		// drive straight into wall
-		while(Button.ESCAPE.isUp()) {
-			if (bot.sensors.isTouched()) {
-				this.bot.driver.stop();
-				break;
+		Screen.clear();
+		Screen.print("Last straight");
+		
+		// drive straight
+		float dist = distanceOptimal;
+		float startTacho = bot.lMotor.getTachoCount();
+		
+		// look left for wall
+		bot.driver.setUSPosition(90, 1, true);
+		
+		while (distanceTraveled < goalDistance) {
+			Screen.clear();
+			distanceTraveled = bot.lMotor.getTachoCount() - startTacho;
+			
+			if (bot.sensors.getTouch() == 1) {
+				stop();
+				Screen.print("Touch");
+				return true;
+			}
+			/*
+			if (SLine.brownOrWhite(bot.sensors.getRGB()) < whiteThreshold) {
+				stop();
+				Screen.print("Color");
+				return true;
+			}*/
+			
+			//Screen.prints("Active: " + bot.sensors.usm.isActive());
+			//Screen.prints("ignore: " + bot.sensors.usm.isIgnorant());
+			
+			dist = bot.sensors.getDistance();
+			Screen.print(dist + "");
+			
+			boolean closeToTarget = distanceTraveled > goalDistance - 480;
+			
+			if (dist < distanceLower) {
+				int correction2 = correction;
+				if (closeToTarget) {
+					//correction2 = correction / 4;
+					bot.driver.forward(speed, speed);
+				} else {
+					bot.driver.forward(speed - correction2, speed + correction2);
+				}
+				Screen.print("RIGHT");
+			} else if (dist > distanceHigher) {
+				int correction2 = correction;
+				if (closeToTarget) {
+					//correction2 = correction / 4;
+					bot.driver.forward(speed, speed);
+				} else {
+					bot.driver.forward(speed + correction2, speed - correction2);
+				}
+				Screen.print("LEFT");
+			} else {
+				bot.driver.forward(speed, speed);
+				Screen.print("STRAIGT");
+				Screen.print("GYRO " + bot.sensors.getAngel());
+				bot.sensors.resetAngel();
+				Screen.sleep(1000);
 			}
 		}
 		
-		// straigthen out
-		bot.driver.drive_(5, speed, -45);
-		bot.driver.drive_(5, speed, 45);
-		bot.driver.drive_(5, speed, 0);
-		
-		// back
-		bot.driver.drive_(10, speed, -180, false);
-		
-		while(bot.sensors.getDistance() < 0.65) {
-			
-		}
-		
-		bot.driver.stop();
-		
-		bot.driver.setUSPosition(0, speed, true);
-		
-		// turn 90 deg right
-		bot.driver.drive_(14, speed, -90);
-		
-		// drive (straight)
-		bot.driver.drive_(60, speed, 0, false);
-		
-		while(bot.sensors.getDistance() < 0.4) {
-			
-		}
-		
 		stop();
-		return false;
+		return true;
 	}
 	
 	private void stop() {
