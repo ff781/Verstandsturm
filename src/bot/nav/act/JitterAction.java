@@ -32,7 +32,7 @@ public class JitterAction extends ThreadBoundAction {
 			int i = 0;
 			while(!stop[0]) {
 				if(i==0) {
-					bot.driver.drive_(jitterDistance * .88f, jitterSpeed, jitterAngel);
+					bot.driver.drive_(jitterDistance * .82f, jitterSpeed, jitterAngel);
 				}
 				else {
 					if(i%2==0) {

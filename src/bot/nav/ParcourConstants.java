@@ -113,12 +113,18 @@ public class ParcourConstants {
 	}
 	
 	public static int colorClassify(float[]rgb, float[]...cs) {
+		return colorClassify(rgb,cs,new float[cs.length]);
+	}
+	
+	public static int colorClassify(float[]rgb, float[][]cs, float[]bias) {
 		float[]cc = null;
 		float min = Float.POSITIVE_INFINITY;
 		int ci = -1;
 		for(int i : Meth.intRange(0, cs.length)) {
 			float[] c = cs[i];
 			float dist = Meth.dist(rgb, c);
+			if(bias!=null)
+				dist += bias[i];
 			if(dist < min) {
 				cc = c;
 				min = dist;
@@ -129,7 +135,7 @@ public class ParcourConstants {
 	}
 	
 	public static final _Predicate<Bot> whiteBrown() {
-		return new FoundFirstLineColorFrom(LINE_WHITE, LINE_BROWN, LINE_BLUE, LINE_FAKE_BLUE);
+		return new FoundFirstLineColorFrom(new float[] {-.05f,0,0,0}, LINE_WHITE, LINE_BROWN, LINE_BLUE, LINE_FAKE_BLUE);
 	}
 	
 	public static final _Predicate<Bot> brownWhite() {

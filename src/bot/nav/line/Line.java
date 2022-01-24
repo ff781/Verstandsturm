@@ -1,6 +1,7 @@
 package bot.nav.line;
 
 import java.io.*;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -11,13 +12,12 @@ import util.func.*;
 import util.coll.*;
 import util.state.*;
 import static bot.nav.ParcourConstants.*;
+import static bot.Driver.*;
 
 public class Line {
 	
 	static State online;
 	static State rotToRFull; static State rotToLFull;
-	static State rotToR; static State rotToL;
-	static State rotRToL; static State rotLToR;
 	static State skipline;
 	static State obstacle;
 	static int lastSuccessLR = 0;
@@ -25,7 +25,7 @@ public class Line {
 	static float[]escalator={10,90,90};
 	static {
 		online = new OnlineState();
-		rotToRFull = new RotToRFullState();rotToLFull = new RotToLFullState();
+		rotToRFull = new RotToXFullState(-1);rotToLFull = new RotToXFullState(1);
 		skipline = new SkiplineState();
 	}
 	
@@ -98,39 +98,20 @@ public class Line {
 			return CollUtil.listOf(State.END,rotToLFull,rotToRFull,obstacle);
 		}
 	}
-	
-	public static class RotToRFullState extends State {
-		public RotToRFullState() {
+	public static class RotToXFullState extends State {
+		public RotToXFullState(int flip) {
 			super(
-					sophisticatedRotSearch(escalator,-1),
+					sophisticatedRotSearch(escalator,flip),
 					CollUtil.<Predicate<Bot>>listOf(
 							whiteBrown()
 							)
 					);
-			this.nextFinalizingAction = new FiniteTurnAction(+(escalator[escalator.length-1]+DEGREE_EPSILON),DEFAULT_TURN_SPEED);
+			this.name = flip < 0 ? "RotToR" : "RotToL";
+			this.nextFinalizingAction = new Drive_Action((escalator[escalator.length-1]+DEGREE_EPSILON) / DIST_TO_DEG,DEFAULT_TURN_SPEED,-flip*90);
 			this.edgeFinalizingActions = new HashMap<>();
-			this.edgeFinalizingActions.put(0, new SetLastSuccessToCurAction());
-		}
-		@Override
-		public List<State> edgeTars() {
-			return CollUtil.listOf(online);
-		}
-		@Override
-		public State next() {
-			return skipline;
-		}
-	}
-	public static class RotToLFullState extends State {
-		public RotToLFullState() {
-			super(
-					sophisticatedRotSearch(escalator, 1),
-					CollUtil.<Predicate<Bot>>listOf(
-							whiteBrown()
-							)
-					);
-			this.nextFinalizingAction = new FiniteTurnAction(-(escalator[escalator.length-1]+DEGREE_EPSILON),DEFAULT_TURN_SPEED);
-			this.edgeFinalizingActions = new HashMap<>();
-			this.edgeFinalizingActions.put(0, new SetLastSuccessToCurAction());			
+			List<Action>actions = new ArrayList<>();
+			actions.add(SetLastSuccessToCurAction.ins);
+			this.edgeFinalizingActions.put(0, ActionUtil.concat(actions));	
 		}
 		@Override
 		public List<State> edgeTars() {
@@ -152,7 +133,8 @@ public class Line {
 				public void start(Bot bot) {
 					lastLR = (int)(flip * direction);
 				}});
-			actions.add(new FiniteTurnAction(flip*direction*(esc+last),LINE_TURN_CROSSING_DETECTION_SPEED));
+			float rot = flip*direction*90;
+			actions.add(new Drive_Action((last+esc) / DIST_TO_DEG,LINE_TURN_CROSSING_DETECTION_SPEED, rot));
 			last = esc;
 		}
 		return ActionUtil.concat(actions);
@@ -174,6 +156,8 @@ public class Line {
 	
 	public static class SetLastSuccessToCurAction extends ImmediateAction {
 
+		public static SetLastSuccessToCurAction ins = new SetLastSuccessToCurAction(); 
+		
 		@Override
 		public void start(Bot bot) {
 			lastSuccessLR = lastLR;

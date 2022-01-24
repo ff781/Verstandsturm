@@ -8,12 +8,13 @@ import static bot.nav.ParcourConstants.*;
 
 public class FoundFirstLineColorFrom extends _Predicate<Bot> implements Predicate<Bot> {
 
+	float[]bias;
 	float[][]cs;
 	
 	
-	
-	public FoundFirstLineColorFrom(float[]... cs) {
+	public FoundFirstLineColorFrom(float[]bias,float[]... cs) {
 		super();
+		this.bias = bias;
 		this.cs = cs;
 	}
 
@@ -21,7 +22,7 @@ public class FoundFirstLineColorFrom extends _Predicate<Bot> implements Predicat
 
 	@Override
 	public Boolean exec(Bot t) {
-		return colorClassify(t.sensors.getRGB(), cs)==0;
+		return colorClassify(t.sensors.getRGB(), cs, bias)==0;
 	}
 
 }

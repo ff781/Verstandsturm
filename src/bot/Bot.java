@@ -26,7 +26,7 @@ public class Bot {
 	public static final float TRACK_WIDTH = 11.5f; 
 	public static final float WHEEL_DIAMETER = 3.5f;
 	
-	public static final int SENSOR_CONNECT_MAX_RETRIES = 4;
+	public static final int SENSOR_CONNECT_MAX_RETRIES = 13;
 
 	public EV3LargeRegulatedMotor lMotor;
 	public EV3LargeRegulatedMotor rMotor;
@@ -63,21 +63,25 @@ public class Bot {
 //		if(this.plugged.get(SensorPort.S4))
 //			this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
 		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.colorS==null;i++)
-			try {
-				this.colorS = new EV3ColorSensor(SensorPort.S1);
-			}catch (Exception e){}
-		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.touchS==null;i++)
-			try {
-				this.touchS = new EV3TouchSensor(SensorPort.S2);
-			}catch (Exception e){}
-		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.gyroS==null;i++)
-			try {
-				this.gyroS = new EV3GyroSensor(SensorPort.S3);
-			}catch (Exception e){}
-		for(int i=0;i<SENSOR_CONNECT_MAX_RETRIES&&this.ultraS==null;i++)
-			try {
-				this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
-			}catch (Exception e){}
+		{
+			if(this.colorS == null)
+				try {
+					this.colorS = new EV3ColorSensor(SensorPort.S1);
+				}catch (Exception e){}
+			if(this.touchS == null)
+				try {
+					this.touchS = new EV3TouchSensor(SensorPort.S2);
+				}catch (Exception e){}
+			if(this.gyroS == null)
+				try {
+					this.gyroS = new EV3GyroSensor(SensorPort.S3);
+				}catch (Exception e){}
+			if(this.ultraS == null)
+				try {
+					this.ultraS = new EV3UltrasonicSensor(SensorPort.S4);
+				}catch (Exception e){}
+			Screen.sleep(200);
+		}
 
 		this.sensors = new SensorThread(colorS, touchS, ultraS, gyroS);
 

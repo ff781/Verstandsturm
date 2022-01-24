@@ -13,6 +13,8 @@ public class State {
 	//represents an ending state, from which no further action is taken
 	public static final State END = new State();
 	
+	//name, does not have to be unique or even set
+	public String name = null;
 	//action that can be executed until termination or interruption
 	public Action action;
 	//list of all edge predicates from this state
@@ -56,6 +58,12 @@ public class State {
 	
 	public State next() {
 		return this.next;
+	}
+	
+	public String getName() {
+		if(name != null)
+			return name;
+		return this.getClass().getSimpleName();
 	}
 	
 	static class Transition {
