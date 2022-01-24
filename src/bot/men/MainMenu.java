@@ -3,6 +3,7 @@ package bot.men;
 import java.util.*;
 
 import bot.Bot;
+import bot.nav.Bridge;
 import bot.nav.ColorSearch;
 import bot.nav.PushBox;
 import bot.nav.SLine;
@@ -52,14 +53,14 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			new PushBox(bot).start();
+			new PushBox(bot).exec();
 			
 		}},
     RUNWAY("Walk the runway"){
 
 		@Override
 		void exec(Bot bot) {
-			// TODO Auto-generated method stub
+			new Bridge(bot).execHC();
 			
 		}},
     COLOR("Find color speckles and purr"){
