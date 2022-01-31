@@ -29,7 +29,7 @@ public class PushBox {
 	
 	private boolean driveStraight() {
 		int distanceTraveled = 0;
-		int goalDistance = 9 * 360;
+		int goalDistance = 8 * 360;
 		int startTacho;
 		float distanceOptimal = 0.26f;
 		float distanceTolerance = 0.03f;
@@ -163,13 +163,13 @@ public class PushBox {
 				//bot.driver.drive_(2f, speed, -0, true);
 				
 				// try to turn exactly to target angle
-				bot.driver.drive_(7f, speed, -80, true);
+				bot.driver.drive_(8f, speed, -80, true);
 			} else {
 				// drive a bit forward
 				bot.driver.drive_(2.7f, speed, -10f, true);
 				
 				// try to turn right to target Angle
-				bot.driver.drive_(7f, speed, -100, true);
+				bot.driver.drive_(7.3f, speed, -100, true);
 				
 				// drive forward ...
 				boolean touched = false;
@@ -255,8 +255,8 @@ public class PushBox {
 		Screen.print("Reposition");
 		
 		// push box a bit more
-		bot.driver.drive_(10, speed, -90, true);
-		bot.driver.drive_(15, speed, 90, true);
+		bot.driver.drive_(15, speed, -90, true);
+		bot.driver.drive_(10, speed, 90, true);
 		
 		Screen.print("DONE with pushing");
 		bot.driver.stop();
@@ -266,7 +266,7 @@ public class PushBox {
 		
 		float startTacho = bot.lMotor.getTachoCount();
 		float distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -1.55f && Button.ESCAPE.isUp()) {
+		while (distanceTraveled > -1f && Button.ESCAPE.isUp()) {
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
@@ -275,7 +275,28 @@ public class PushBox {
 		
 		startTacho = bot.lMotor.getTachoCount();
 		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -2.45f && Button.ESCAPE.isUp()) {
+		while (distanceTraveled > -0.9f && Button.ESCAPE.isUp() && !bot.sensors.isTouched()) {
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+		}
+		
+		// forward towards wall
+		bot.driver.drive_(20, speed, 0, false);
+		while (Button.ESCAPE.isUp() && !bot.sensors.isTouched()) {}
+		
+		// drive back
+		bot.driver.forward(-speed, -speed);
+		startTacho = bot.lMotor.getTachoCount();
+		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+		while (distanceTraveled > -1.6f && Button.ESCAPE.isUp()) {
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+		}
+		
+		// turn right
+		bot.driver.forward(-speed, speed);
+		
+		startTacho = bot.lMotor.getTachoCount();
+		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+		while (distanceTraveled > -1.5f && Button.ESCAPE.isUp() && !bot.sensors.isTouched()) {
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
@@ -286,7 +307,7 @@ public class PushBox {
 	private boolean lastStraight() {
 		float goalDistance = 5 * 360;
 		float distanceTraveled = 0f;
-		float distanceOptimal = 0.35f;
+		float distanceOptimal = 0.15f;
 		float distanceTolerance = 0.03f;
 		float distanceLower = distanceOptimal - distanceTolerance;
 		float distanceHigher = distanceOptimal + distanceTolerance;
@@ -301,74 +322,67 @@ public class PushBox {
 		float dist = distanceOptimal;
 		float startTacho = bot.lMotor.getTachoCount();
 		
-		// look left for wall
+		// look left
 		bot.driver.setUSPosition(90, 1, true);
 		
-		while (distanceTraveled < goalDistance) {
-			Screen.clear();
-			distanceTraveled = bot.lMotor.getTachoCount() - startTacho;
-			
-			if (bot.sensors.getTouch() == 1) {
+		// drive forward
+		bot.driver.drive_(20, speed / 2, 0, false);
+		
+		while (Button.ESCAPE.isUp()) {
+			if (bot.sensors.getDistance() > 0.5f || ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE, ParcourConstants.LINE_FAKE_BLUE) == 0) {
 				stop();
-				Screen.print("Touch");
-				touched = true;
-				break;
-			}
-			
-			if (ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE) == 0) {
-				stop();
-				Screen.print("BLUE");
+				Screen.beep();
 				return true;
 			}
 			
-			//Screen.prints("Active: " + bot.sensors.usm.isActive());
-			//Screen.prints("ignore: " + bot.sensors.usm.isIgnorant());
-			
-			dist = bot.sensors.getDistance();
-			Screen.print(dist + "");
-			
-			boolean closeToTarget = distanceTraveled > goalDistance - 480;
-			
-			if (dist < distanceLower) {
-				int correction2 = correction;
-				if (closeToTarget) {
-					bot.driver.forward(speed, speed);
-				} else {
-					bot.driver.forward(speed - correction2, speed + correction2);
-				}
-				Screen.print("RIGHT");
-			} else if (dist > distanceHigher) {
-				int correction2 = correction;
-				if (closeToTarget) {
-					bot.driver.forward(speed, speed);
-				} else {
-					bot.driver.forward(speed + correction2, speed - correction2);
-				}
-				Screen.print("LEFT");
-			} else {
-				bot.driver.forward(speed, speed);
-				Screen.print("STRAIGT");
-				Screen.print("GYRO " + bot.sensors.getAngel());
-				bot.sensors.resetAngel();
-				Screen.sleep(1000);
+			if (bot.sensors.isTouched()) {
+				touched = true;
+				bot.driver.stop();
+				break;
 			}
 		}
 		
 		if (touched) {
-			bot.driver.drive_(3, speed / 2, -180, true);
-			bot.driver.drive_(8, speed / 2, -90, true);
-			bot.driver.forward(speed, speed);
-			while (bot.sensors.getDistance() < 0.4f && Button.ESCAPE.isUp()) {} 
-			bot.driver.drive_(8, speed / 2, 90, true);
-		}
-		
-		bot.driver.drive_(4, speed / 2, 0, false);
-		
-		while (Button.ESCAPE.isUp()) {
-			if (ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE) == 0) {
-				stop();
-				return true;
+			// drive back
+			bot.driver.forward(-speed, -speed);
+			
+			startTacho = bot.lMotor.getTachoCount();
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+			while (distanceTraveled > -1.5f && Button.ESCAPE.isUp()) {
+				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			}
+			
+			// turn right
+			bot.driver.forward(-speed, speed);
+			
+			startTacho = bot.lMotor.getTachoCount();
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+			while (distanceTraveled > -1.7f && Button.ESCAPE.isUp()) {
+				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+			}
+			
+			// drive back to orient
+			bot.driver.forward(-speed, -speed);
+			
+			startTacho = bot.lMotor.getTachoCount();
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+			while (distanceTraveled > -2.5f && Button.ESCAPE.isUp()) {
+				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+			}
+			
+			// drive forward
+			bot.driver.forward(speed, speed);
+			while (bot.sensors.getDistance() < 0.3f && Button.ESCAPE.isUp()) {} 
+			
+			// turn left
+			bot.driver.forward(speed, -speed);
+			
+			startTacho = bot.rMotor.getTachoCount();
+			distanceTraveled = (bot.rMotor.getTachoCount() - startTacho) / 360;
+			while (distanceTraveled > -1.7f && Button.ESCAPE.isUp()) {
+				distanceTraveled = (bot.rMotor.getTachoCount() - startTacho) / 360;
+			}
+						
 		}
 		
 		stop();
