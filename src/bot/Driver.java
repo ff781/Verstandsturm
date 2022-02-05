@@ -35,7 +35,7 @@ public class Driver {
     public static final float driveFactor = 36 / turnDegFactorL;
     
     // saving US position (degrees). Assumption: start at 0 (forward facing)
-    // negative = left, positive = right
+    // negative = right, positive = left
     private float usPosition = 0;
 
 	Bot bot;
@@ -212,7 +212,7 @@ public class Driver {
 		
 		float difference = goalPos - usPosition;
 		
-		turnUS(-difference, speed, blocking);
+		turnUS(difference, speed, blocking);
 		
 		usPosition = goalPos;
 		
