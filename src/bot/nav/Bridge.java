@@ -93,7 +93,7 @@ public class Bridge {
 							};
 						}}
 					));
-			// TODO Auto-generated constructor stub
+			this.next = State.END;
 		}
 		
 	}
