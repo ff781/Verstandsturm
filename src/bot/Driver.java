@@ -3,6 +3,7 @@ package bot;
 import lejos.hardware.motor.*;
 
 import util.meth.Meth;
+import util.thrd.Timer;
 
 /*
  * degrees are in degrees, positive is counterclockwise="left"
@@ -15,11 +16,18 @@ public class Driver {
 	
 	public static final float BACKWARD_DEGREES = 180;
 	public static final float FORWARD_DEGREES = 0;
+	public static final float LEFT_DEGREES = 90;
+	public static final float RIGHT_DEGREES = -90;
 	
-	public static final float DIST_TO_DEG = 5.5f;
+	//distance to turning degree when turning left or right using drive_(distance, speed, rot), abs(rot % 360) = 90
+	public static final float DIST_TO_DEG = 5.9f;
 
 	public static final boolean BLOCKING_DEFAULT = true;
-	public static final boolean HARD_DEFAULT = false;
+	public static final int HARD_STOP = 2;
+	public static final int FLT_STOP = 1;
+	public static final int NO_STOP = 0;
+	
+	public static final int HARD_DEFAULT = FLT_STOP;
 
 	//scaling constants for turning degree and turning speed
 	public static final float turnDegFactorL = 5.88f;
@@ -50,14 +58,14 @@ public class Driver {
 	public void turn(float deg, float speed, boolean blocking){
 		this.turn(deg, speed, blocking, HARD_DEFAULT);
 	}
-	public void turn(float deg, float speed, boolean blocking, boolean hard) {
+	public void turn(float deg, float speed, boolean blocking, int hard) {
 		Thread threadL, threadR;
-		if(hard) {
+		if(hard >= 2) {
 			threadL = new RotateThread(this.bot.lMotor, deg*turnDegFactorL, speed*turnSpeedFactorL);
 			threadR = new RotateThread(this.bot.rMotor, -deg*turnDegFactorR, speed*turnSpeedFactorR);
 		}else {
-			threadL = new TachoRotateThread(this.bot.lMotor, deg*turnDegFactorL, speed*turnSpeedFactorL);
-			threadR = new TachoRotateThread(this.bot.rMotor, -deg*turnDegFactorR, speed*turnSpeedFactorR);
+			threadL = new TachoRotateThread(this.bot.lMotor, deg*turnDegFactorL, speed*turnSpeedFactorL, hard == 1);
+			threadR = new TachoRotateThread(this.bot.rMotor, -deg*turnDegFactorR, speed*turnSpeedFactorR, hard == 1);
 		}
 		Thread[]threads = new Thread[]{
 				threadL, threadR,
@@ -109,7 +117,13 @@ public class Driver {
 	public void drive_(float distance, float speed, float rotation, boolean blocking) { 
 		this.drive_(distance, speed, rotation, BLOCKING_DEFAULT, HARD_DEFAULT);
 	}
-	public void drive_(float distance, float speed, float rotation, boolean blocking, boolean hard) {
+	public void drive_(float distance, float speed, float rotation, boolean blocking, int hard) {
+		this.drive_(distance, speed, rotation, blocking, hard, null);
+	}
+	public void drive_(float distance, float speed, float rotation, boolean blocking, int hard, Thread[] threads) {
+		if(threads == null) {
+			threads = new Thread[2];
+		}
 		distance *= driveFactor;
 		//offset to actual 1,1 position for motor 
 		rotation += 45;
@@ -118,17 +132,16 @@ public class Driver {
 		float lscalar = Meth.sin(rad) * Meth.sqrtof2;
 		float rscalar = Meth.cos(rad) * Meth.sqrtof2;
 		Thread threadL, threadR;
-		if(hard) {
+		if(hard >= 2) {
 			threadL = new RotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL);
 			threadR = new RotateThread(this.bot.rMotor, rscalar*distance*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
 		}else {
-			threadL = new TachoRotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL);
-			threadR = new TachoRotateThread(this.bot.rMotor, rscalar*distance*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
+			threadL = new TachoRotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL, hard == 1);
+			threadR = new TachoRotateThread(this.bot.rMotor, rscalar*distance*turnDegFactorR, rscalar*speed*turnSpeedFactorR, hard == 1);
 		}
-		Thread[]threads = new Thread[]{
-				threadL, threadR,
-		};
-		Meth.shuffle(threads);
+		threads[0] = threadL;
+		threads[1] = threadR;
+		//Meth.shuffle(threads);
 		for(Thread t:threads)t.start();
 		if(blocking) {
 			try{
@@ -142,23 +155,25 @@ public class Driver {
 		BaseRegulatedMotor motor;
 		float rad;
 		float speed;
+		boolean flt;
 
-		public TachoRotateThread(BaseRegulatedMotor motor, float rad, float speed) {
+		public TachoRotateThread(BaseRegulatedMotor motor, float rad, float speed, boolean flt) {
 			this.motor = motor;
 			this.rad = rad;
 			this.speed = speed;
+			this.flt = flt;
 		}
 		public void run(){
 			motor.resetTachoCount();
-			motor.getTachoCount();
 			motor.setSpeed(speed);
 			if(rad > 0) {
 				motor.forward();
 			}else {
 				motor.backward();
 			}
-			while(motor.getTachoCount()<rad);
-			motor.flt();
+			while(motor.getTachoCount() / rad < 1 && motor.isMoving());
+			if(this.flt)
+				motor.flt();
 		}
 	}
 	
@@ -201,7 +216,7 @@ public class Driver {
 	public void driveStop() {
 		this.driveStop(HARD_DEFAULT);
 	}
-	public void driveStop(final boolean hard) {
+	public void driveStop(final int hard) {
 		
 		Thread[]threads = new Thread[] {
 				new DriveStopThread(this.bot.rMotor, hard),
@@ -216,15 +231,15 @@ public class Driver {
 	}
 	static class DriveStopThread extends Thread {
 		BaseRegulatedMotor motor;
-		boolean hard;
-		public DriveStopThread(BaseRegulatedMotor motor, boolean hard) {
+		int hard;
+		public DriveStopThread(BaseRegulatedMotor motor, int hard) {
 			this.motor = motor;
 			this.hard = hard;
 		}
 		public void run() {
-			if (hard)
+			if (hard >= 2)
 				this.motor.stop();
-			else
+			else if (hard == 1)
 				this.motor.flt();
 		}
 	}

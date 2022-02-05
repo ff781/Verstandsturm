@@ -8,6 +8,14 @@ public class ActionUtil {
 	
 	private ActionUtil() {}
 	
+	public static Action multiply(int n, Action action) {
+		List<Action> actions = new ArrayList<>(n);
+		for(int i=0;i<n;i++) {
+			actions.add(action);
+		}
+		return new ConcatAction(actions);
+	}
+	
 	public static Action concat(List<Action> actions) {
 		return new ConcatAction(actions);
 	}

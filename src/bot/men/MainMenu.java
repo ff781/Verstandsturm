@@ -32,18 +32,26 @@ public class MainMenu extends TextMenu {
   public void open(Bot bot){
     Sound.beepSequenceUp();
 
-		while (Button.ESCAPE.isUp()) {
-						
-			Screen.clear();
-
+		while (true) {
 			int select = this.select();			
 			if(select >= 0 && select < Task.values.length)
-			(Task.values[select]).exec(bot);
-			Screen.sleep(20);
+			(Task.values[select]).exec(bot);			
+			else if(select==-1) {
+				break;
+			}
 		}
   }
 
   public static enum Task {
+	ALL("EVERYTHING") {
+		@Override
+		void exec(Bot bot) {
+			LINE.exec(bot);
+			PUSH.exec(bot);
+			RUNWAY.exec(bot);
+			COLOR.exec(bot);
+		}
+	},
     LINE("Follow the line (not sus)"){
 
 		@Override
@@ -84,6 +92,7 @@ public class MainMenu extends TextMenu {
 		void exec(Bot bot) {
 			Screen.sleep(100);
 			int mode = 0;
+			float speedDefault = 2.2f;
 			float[]speedFactors = {.25f,.5f,1,2,4};
 			String[]modeDesc = {"drive&turn mode","rotor turn mode","change speed mode"};
 			int i = 2;
@@ -97,13 +106,13 @@ public class MainMenu extends TextMenu {
 				switch(mode) {
 					case 0:
 						if(Button.LEFT.isDown()) {
-							bot.driver.turn(90, 1 * speedFactors[i]);
+							bot.driver.drive_(90/Driver.DIST_TO_DEG, speedDefault * speedFactors[i], Driver.LEFT_DEGREES);
 						}else if(Button.RIGHT.isDown()) {
-							bot.driver.turn(-90, 1 * speedFactors[i]);
+							bot.driver.drive_(90/Driver.DIST_TO_DEG, speedDefault * speedFactors[i], Driver.RIGHT_DEGREES);
 						}else if(Button.UP.isDown()) {
-							bot.driver.drive_(10, 1 * speedFactors[i], Driver.FORWARD_DEGREES);
+							bot.driver.drive_(10, speedDefault * speedFactors[i], Driver.FORWARD_DEGREES);
 						}else if(Button.DOWN.isDown()) {
-							bot.driver.drive_(10, 1 * speedFactors[i], Driver.BACKWARD_DEGREES);
+							bot.driver.drive_(10, speedDefault * speedFactors[i], Driver.BACKWARD_DEGREES);
 						}
 						break;
 					case 1:
@@ -112,7 +121,9 @@ public class MainMenu extends TextMenu {
 						}else if(Button.RIGHT.isDown()) {
 							bot.driver.turnUS(-90, 1 * speedFactors[i]);
 						}else if(Button.UP.isDown()) {
+							bot.driver.turnUS(10, 1 * speedFactors[i]);
 						}else if(Button.DOWN.isDown()) {
+							bot.driver.turnUS(-10, 1 * speedFactors[i]);
 						}
 						break;
 					case 2:
@@ -157,8 +168,9 @@ public class MainMenu extends TextMenu {
 							Screen.prints("r:" + rgb[0]);
 							Screen.prints("g:" + rgb[1]);
 							Screen.prints("b:" + rgb[2]);
-							Screen.prints(colorClassify(rgb, LINE_WHITE, LINE_BROWN, LINE_BLUE) + "");
-							//Screen.prints(colorIDToString(bot.sensors.getColorID()));
+							//Screen.prints(colorClassify(rgb, LINE_WHITE, LINE_BROWN, LINE_BLUE) + "");
+							Screen.prints(bot.sensors.getColorID()+"");
+							Screen.prints(colorIDToString(bot.sensors.getColorID()));
 							break;
 						case 1:
 							Screen.prints(String.format("being touched %s%n", bot.sensors.getTouch()));

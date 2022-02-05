@@ -40,7 +40,14 @@ public class ParcourConstants {
 		return Math.abs((is-goal)/goal) < DISTANCE_TOLERANCE;
 	}
 	
-	public static final float DEGREE_EPSILON = 5;
+	//#obstacle constants
+	public static final float OBSTACLE1_BACKOFF_DISTANCE = 7.5f;
+	
+	public static final float OBSTACLE_ROT_DEGREES = 45.f;
+	public static final float OBSTACLE_SLIDEWAYS_DISTANCE = 27.f;
+
+	public static final float OBSTACLE_TO_2ND_CRASH_DISTANCE = 34.f;
+	public static final float OBSTACLE_ENDSPURT_DISTANCE = 7f;
 	
 	//#speed
 	
@@ -48,7 +55,7 @@ public class ParcourConstants {
 	public static final float LINE_CROSSING_DETECTION_SPEED = 2.5f;
 	
 	//speed at which the robot can detect crossing a line by turning (~3cm wide)
-	public static final float LINE_TURN_CROSSING_DETECTION_SPEED = 2.69f;
+	public static final float LINE_TURN_CROSSING_DETECTION_SPEED = LINE_CROSSING_DETECTION_SPEED;
 	
 	//speed at which the robot can sufficiently accurately detect the edge of an obstacle while turning
 	public static final float LINE_TURN_EDGE_DETECTION_SPEED = 1f;
@@ -147,8 +154,8 @@ public class ParcourConstants {
 	}
 	
 	public static final float SKIP_LINE_JITTER_DISTANCE = 15.f;
-	public static final float SKIP_LINE_JITTER_SPEED = 2.6f;
-	public static final float SKIP_LINE_JITTER_ANGEL = 30.f;
+	public static final float SKIP_LINE_JITTER_SPEED = 2.1f;
+	public static final float SKIP_LINE_JITTER_ANGEL = 45.f;
 	
 	public static String rgbInfo(Bot bot) {
 		return rgbToString(bot.sensors.getRGB());

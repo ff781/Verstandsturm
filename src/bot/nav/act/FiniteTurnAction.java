@@ -11,12 +11,12 @@ public class FiniteTurnAction extends NoSEAction {
 	public float turnSpeed;
 	
 	private Timer startTimer;
-	private boolean hard;
+	private int hard;
 
 	public FiniteTurnAction(float turnDegrees, float turnSpeed) {
-		this(turnDegrees, turnSpeed, false);
+		this(turnDegrees, turnSpeed, 1);
 	}
-	public FiniteTurnAction(float turnDegrees, float turnSpeed, boolean hard) {
+	public FiniteTurnAction(float turnDegrees, float turnSpeed, int hard) {
 		super();
 		this.turnDegrees = turnDegrees;
 		this.turnSpeed = turnSpeed;
@@ -33,6 +33,7 @@ public class FiniteTurnAction extends NoSEAction {
 
 	@Override
 	public void stop(Bot bot) {
+		bot.driver.driveStop(hard);
 	}
 
 	@Override

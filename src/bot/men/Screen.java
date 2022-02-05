@@ -1,8 +1,10 @@
 package bot.men;
 
+import java.io.File;
 import java.util.*;
 
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.lcd.*;
 
 public class Screen {
@@ -13,6 +15,8 @@ public class Screen {
 	  for(int i : new int[] {Button.ID_DOWN,Button.ID_LEFT,Button.ID_RIGHT,Button.ID_UP,Button.ID_ENTER,Button.ID_ESCAPE}) {
 		wasPressed.put(i, false);
 	  }
+	  
+	  Sound.setVolume(Sound.VOL_MAX);
   }
   
   public static void startButtonThread() {
@@ -61,6 +65,11 @@ public class Screen {
 	 boolean r = wasPressed.get(id);
 	 if(r) wasPressed.put(id,false);
 	 return r;
+  }
+  
+  public static void beep() {
+	  Sound.playSample(new File("sonde.wav"));
+	  //Sound.beep();
   }
 
   public static void clear(){
