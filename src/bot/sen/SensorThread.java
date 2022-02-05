@@ -14,20 +14,22 @@ public class SensorThread implements Runnable{
   public SensorWrap usm;
   public SensorWrap gsm;
   public SensorWrap csmid;
+  
+  public int lastTouch;
 
   public SensorThread(EV3ColorSensor cs, EV3TouchSensor ts, EV3UltrasonicSensor us, EV3GyroSensor gs){
     this.gs = gs;
 
+    this.csmid = cs != null ? new SensorWrap(cs.getColorIDMode()) : SensorWrap.empty();
 	this.csm = cs != null ? new SensorWrap(cs.getRGBMode()) : SensorWrap.empty();
 	this.tsm = ts != null ? new SensorWrap(ts.getTouchMode()) : SensorWrap.empty();
     this.usm = us != null ? new SensorWrap(us.getDistanceMode()) : SensorWrap.empty();
     this.gsm = gs != null ? new SensorWrap(gs.getAngleAndRateMode()) : SensorWrap.empty();
-    //this.csmid = cs != null ? new SensorWrap(cs.getColorIDMode()) : SensorWrap.empty();
   }
   
   private SensorWrap[]g(){
-	  return new SensorWrap[]{csm,tsm,usm,gsm,};
-	  //return new SensorWrap[]{csm,tsm,usm,gsm,csmid,};
+	  //return new SensorWrap[]{csm,tsm,usm,gsm,};
+	  return new SensorWrap[]{csm,tsm,usm,gsm,csmid,};
   }
   
   public void start() {
@@ -38,7 +40,7 @@ public class SensorThread implements Runnable{
 
   @Override
   public void run(){
-	  long millisDelay = 5;
+	  long millisDelay = 1;
 	  long c = System.currentTimeMillis();
     try{
       while(true){
@@ -61,6 +63,13 @@ public class SensorThread implements Runnable{
     return this.tsm.getSample();
   }
   
+  public boolean touchee() {
+	  int cur = (int)this.getTouch();
+	  int diff = cur - lastTouch;
+	  lastTouch = cur;
+	  return diff==1;
+  }
+  
   public boolean isTouched() {
 	  return this.getTouch() == 1;
   }
@@ -71,17 +80,17 @@ public class SensorThread implements Runnable{
   }
   
   public int getColorID() {
-	  this.assertCs();
-	  return (int)this.csmid.getSample();
+	this.assertCs();
+	return (int)this.csmid.getSample();
   }
 
   public float getDistance(){
-	  this.assertUs();
+	this.assertUs();
     return this.usm.getSample();
   }
 
   public float getAngelV(){
-	  this.assertGs();
+	this.assertGs();
     return this.gsm.getSamples()[1];
   }
 
