@@ -331,7 +331,7 @@ public class PushBox {
 		while (Button.ESCAPE.isUp()) {
 			if (bot.sensors.getDistance() > 0.5f || ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE, ParcourConstants.LINE_FAKE_BLUE) == 0) {
 				stop();
-				Screen.beep();
+				//Screen.beep();
 				return true;
 			}
 			
