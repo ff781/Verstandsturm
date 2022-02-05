@@ -33,13 +33,13 @@ public class Bridge {
 	public void execHC() {
 		this.bot.driver.drive(98, 4, 1, true);
 		
-		this.bot.driver.turnGyro(90, 2);
+		this.bot.driver.turnGyro(91, 2);
 		
 		this.bot.driver.drive(125, 4, 1, true);
 		
-		this.bot.driver.turnGyro(90, 2);
+		this.bot.driver.turnGyro(91, 2);
 		
-		this.bot.driver.drive(98, 4, 1, true);
+		this.bot.driver.drive(98, 4, 1, true);	
 		
 		/******************
 		this.bot.driver.driveForever(3);
@@ -63,51 +63,7 @@ public class Bridge {
 	
 	public void exec() {
 
-		startOrientation = this.bot.sensors.getAngel();
-		rgbStart = this.bot.sensors.getRGB();
-		
-		float[] rgb = this.bot.sensors.getRGB();
-		rStart = rgb[0];
-		gStart = rgb[1];
-		bStart = rgb[2];
-		
-		LCD.clear();
-		
-		while (Button.ESCAPE.isUp()) {
-			
-			switch(phase) {
-				
-			case 1:
-				System.out.println("T2: Drive U");
-				driveUp();
-				phase = 2;
-				break;
-				
-			case 2:
-				System.out.println("T3: Drive L");
-				driveAcross();
-				phase = 3;
-				break;
-				
-			case 3:
-				System.out.println("T4: Drive D");
-				driveDown();
-				phase = 4;
-				
-			case 4:
-				System.out.println("Ramp Done");
-				finish();
-				phase = 5;
-				break;
-				
-		
-			default:
-				System.out.println("Finito");
-				return;
-			}
-		}
-		
-		this.bot.driver.stop();
+		execHC();
 	}
 	
 	

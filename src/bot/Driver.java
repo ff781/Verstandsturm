@@ -73,36 +73,44 @@ public class Driver {
 	}
 	
 	public void turnGyro(float deg, float speed){
+		this.bot.lMotor.resetTachoCount();
+		this.bot.rMotor.resetTachoCount();
 		float origin = this.bot.sensors.getAngel();
-		float tacho = this.bot.lMotor.getTachoCount();
-		float tachoLimit = (450f) * (deg / 90f);
+		float tacho;
+		float tachoLimit = (500f) * (deg / 90f);
 		float dir;
 		if (deg >= 0f) {
 			turn(200, speed, false);
+			tacho = this.bot.lMotor.getTachoCount();
 		}
 		else {
 			turn(-200, speed, false);
+			tacho = this.bot.rMotor.getTachoCount();
 		}
 		dir = (deg * 0.84f);
 		while(Button.ESCAPE.isUp()) {
-			System.out.println(this.bot.lMotor.getTachoCount() - tacho);
+			System.out.println(this.bot.rMotor.getTachoCount() - tacho);
 			if(this.bot.lMotor.getTachoCount() - tacho >= tachoLimit && dir >= 0) {
-				stop();
 				break;
-			}
+			}	
 			else if(dir >= 0) {
 				if(this.bot.sensors.getAngel() - origin >= dir) {
-					stop();
 					break;
 				}
 			}
 			else{
 				if(this.bot.sensors.getAngel() - origin <= dir) {
-					stop();
 					break;
 				}
 			}
 		}
+		if(deg >= 0f) {
+			turn(0, speed, true);
+		}
+		else {
+			turn(0, speed, true);
+		}
+
 		Screen.clear();
 	}
 	

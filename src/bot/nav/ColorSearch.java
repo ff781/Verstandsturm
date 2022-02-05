@@ -75,7 +75,7 @@ public class ColorSearch {
 				if (cnt == 0) {
 					this.bot.driver.drive(2f, 4f, -1);
 					this.bot.driver.turnGyro(90f, 1f);
-					this.bot.driver.drive(10f, 4f, -1);
+					this.bot.driver.drive(8f, 4f, -1);
 					this.bot.driver.forward();
 					cnt += 2;		
 				}
@@ -83,18 +83,18 @@ public class ColorSearch {
 				else {
 					if(cnt % 2 == 0) {
 						this.bot.driver.drive(4f, 4f, -1);
-						this.bot.driver.turnGyro(90f, 1f);
+						this.bot.driver.turnGyro(90f, 2f);
 						this.bot.driver.drive(8f, 4f, 1);
-						this.bot.driver.turnGyro(90f, 1f);
+						this.bot.driver.turnGyro(90f, 2f);
 						this.bot.driver.drive(15f, 4f, -1);
 						this.bot.driver.forward();
 						cnt++;
 					}
 					else {
 						this.bot.driver.drive(4f, 4f, -1);
-						this.bot.driver.turnGyro(-90f, 1f);
+						this.bot.driver.turnGyro(-90f, 2f);
 						this.bot.driver.drive(8f, 4f, 1);
-						this.bot.driver.turnGyro(-90f, 1f);
+						this.bot.driver.turnGyro(-90f, 2f);
 						this.bot.driver.drive(15f, 4f, -1);
 						this.bot.driver.forward();
 						cnt++;
