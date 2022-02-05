@@ -17,9 +17,17 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 	
 	boolean stop;
 	boolean running;
+	//whether to render information on brick screen
+	public boolean render;
+	//whether to record a state history, e.g. for debugging
+	boolean historian;
 	
 	State start;
 	State cur;
+	
+	List<State> history;
+	List<State.Transition> transitionHistory;
+	public StringBuilder extraLogInfo;
 	
 	public StateExecutor(State start) {
 		super();
@@ -33,49 +41,100 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 
 	public void exec(final Bot bot, final boolean[]stop) {
 		State next;
-		Clock renderClock = new Clock(200) {
+		final String[]renderBuffer = new String[10];
+		long lastTick = System.currentTimeMillis();
+		final long[]lastDiff = {0};
+		Clock renderClock = new Clock(250) {
 
 			@Override
 			public void exec() {
-				Screen.clear();
-				Screen.prints(((cur==null)?null:cur.getClass().getSimpleName()) + "");
-				Screen.prints(rgbInfo(bot));
-				Screen.prints(colorBinaryClassify(bot.sensors.getRGB(), LINE_WHITE, LINE_BROWN) + "");
-				Screen.prints(Meth.length(Meth.sub(bot.sensors.getRGB(), LINE_WHITE))+"");
-				Screen.prints(Meth.length(Meth.sub(bot.sensors.getRGB(), LINE_BROWN))+"");
-				Screen.prints(colorIDToString(bot.sensors.getColorID()));
+				if(render) {
+					Screen.clear();
+					Screen.prints(((cur==null)?null:cur.getName()) + "");
+					//Screen.prints(rgbInfo(bot));
+					String color = "unknown";
+//					switch(colorClassify(bot.sensors.getRGB(), ALL_COLORS))
+//					{
+//					case LINE_WHITE_I: color = "WHITE";break;
+//					case LINE_BROWN_I: color = "BROWN";break;
+//					case LINE_BLUE_I: color = "BLUE";break;
+//					case LINE_FAKE_BLUE_I: color = "FAKE_BLUE";break;
+//					}
+					color = whiteBrown().exec(bot) ? "WHITE" : "BROWN";
+					Screen.prints(color + "");
+					Screen.prints("ts:"+lastDiff[0]);
+					//Screen.prints("ep:"+cur.edgePreds.size());
+					for(String s : renderBuffer) {
+						if(s!=null) {
+							Screen.prints(s);
+						}
+					}
+				}
 			}};
 			renderClock.start();
 		try {
 			cur = start;
+			if(this.historian) {
+				this.history.add(cur);
+			}
 			if(cur == State.END) return;
 			running = true;
 			
 			
 			next = null;
 			boolean transitionByEnd = false;
+			Action finalizingAction = null;
 			cur.action.reset();
 			cur.action.start(bot);
 			
 			
-			while(!stop[0] && Button.ESCAPE.isUp()) {
+			while(!stop[0] && !Screen.wasPressed(Button.ID_ESCAPE)) {
 				
 				//proceeds with the next state
 				if(next!=null) {
-					if(!transitionByEnd) cur.action.stop(bot);
+					if(this.historian) {
+						this.history.add(next);
+						this.transitionHistory.add(new State.Transition(cur, next, !transitionByEnd));
+					}
+					if(!transitionByEnd) {
+						cur.action.stop(bot);	
+					}
+					if(finalizingAction!=null) {
+						finalizingAction.reset();
+						finalizingAction.start(bot);
+						renderBuffer[4] = "fin "+cur.getClass().getSimpleName();
+						while(!finalizingAction.finished(bot) && Button.ESCAPE.isUp()) Screen.sleep(50);
+					}
+					finalizingAction = null;
 					transitionByEnd = false;
 					cur = next;
 					next = null;
+					//renderBuffer[3] = "waiting for press";
+					//Button.waitForAnyPress();
+					for(int ri=0;ri<renderBuffer.length;ri++)renderBuffer[ri]=null;
 					if(cur == State.END) break;
+					cur.action.reset();
 					cur.action.start(bot);
 				}
 				//if action has finished, proceeded to next state on the end edge
 				if(cur.action.finished(bot)) {
+					if(cur.action instanceof ActionUtil.ConcatAction) {
+						ActionUtil.ConcatAction cca = (ActionUtil.ConcatAction)cur.action;
+						boolean isNull = cca.thread == null;
+						extraLogInfo.append(isNull?1:0).append(' ');
+						if(!isNull) {
+							extraLogInfo.append(cca.thread.isAlive()?1:0).append('\n');
+						}
+					}
 					if(cur.next() != null) {
 						next = cur.next();
 						transitionByEnd = true;
+						finalizingAction = cur.nextFinalizingAction();
+						for(int ri=0;ri<renderBuffer.length;ri++)renderBuffer[ri]=null;
+						renderBuffer[0] = cur.getClass().getSimpleName()+" end";
+						renderBuffer[1] = next.getClass().getSimpleName();
 					} else {
-						throw new RuntimeException("undefined transition when action ends");
+						throw new RuntimeException("undefined transition when action ends for state " + cur.getClass().getSimpleName());
 					}
 				}
 				//else check whether some edge predicate is fulfilled and go to the corresponding state
@@ -85,26 +144,62 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 					if(nondeterministic) {
 						Meth.shuffle(indices);
 					}
+					renderBuffer[0] = "i:" + indices.toString() + "";
+					long now = System.currentTimeMillis();
+					lastDiff[0] = now - lastTick;
+					lastTick = now;
 					for(int i:indices) {
 						Predicate<Bot> edgePred = cur.edgePreds.get(i);
 						boolean step = edgePred.exec(bot);
 						if(step) {
 							next = cur.edgeTars().get(i);
+							finalizingAction = cur.edgeFinalizingActions().get(i);
+							for(int ri=0;ri<renderBuffer.length;ri++)renderBuffer[ri]=null;
+							renderBuffer[1] = i +" "+cur.getClass().getSimpleName();
+							renderBuffer[2] = "n "+next.getClass().getSimpleName();
 							break;
 						}
 					}
 				}
 				
 			}
-			Screen.sleep(100);
+			if(cur != null && cur.action != null && !cur.action.finished(bot)) {
+				cur.action.stop(bot);
+			}
 			renderClock.stopp();
 		} catch (Exception e) {
+			if(cur != null && cur.action != null && !cur.action.finished(bot)) {
+				cur.action.stop(bot);
+			}
 			renderClock.stopp();
-			Screen.clear();
-			Screen.prints(e.getStackTrace()+"");
-			Button.waitForAnyEvent();
+			throw e;
+//			Screen.clear();
+//			Screen.prints(e.getStackTrace()+"");
+//			Button.waitForAnyEvent();
+		} finally {
+			if(cur != null && cur.action != null && !cur.action.finished(bot)) {
+				cur.action.stop(bot);
+			}
+			renderClock.stopp();
 		}
 		running = false;
+	}
+	
+	public void setHistorian(boolean a) {
+		if(this.historian != a) {
+			this.historian = a;
+			this.history = this.historian ? new ArrayList<State>() : null;
+			this.transitionHistory = this.historian ? new ArrayList<State.Transition>() : null;
+			this.extraLogInfo = this.historian ? new StringBuilder() : null;
+		}
+	}
+
+	public List<State> getHistory() {
+		return this.history;
+	}
+	
+	public List<State.Transition> getTransitionHistory() {
+		return this.transitionHistory;
 	}
 	
 	public class ThreadFactory implements Function2<Bot,boolean[],Thread>{

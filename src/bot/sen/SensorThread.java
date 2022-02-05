@@ -38,13 +38,18 @@ public class SensorThread implements Runnable{
 
   @Override
   public void run(){
+	  long millisDelay = 5;
+	  long c = System.currentTimeMillis();
     try{
       while(true){
-        for(SensorWrap sw : g()){
-        	if(sw!=null)
-        		sw.get();
-        }
-        Thread.sleep(25);
+    	long n = System.currentTimeMillis();
+    	if(n - c > millisDelay) {
+	        for(SensorWrap sw : g()){
+	        	if(sw!=null)
+	        		sw.get();
+	        }
+	        c = n;
+    	}
       }
     }catch(Exception e){
       e.printStackTrace();

@@ -1,27 +1,31 @@
 package bot.nav.line;
 
+import java.io.*;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.*;
 
 import bot.*;
-import bot.men.Screen;
 import bot.nav.act.*;
-import lejos.hardware.Button;
 import util.func.*;
 import util.coll.*;
 import util.state.*;
 import static bot.nav.ParcourConstants.*;
+import static bot.Driver.*;
 
 public class Line {
 	
 	static State online;
-	static State rotToR; static State rotToL;
-	static State rotRToL; static State rotLToR;
+	static State rotToRFull; static State rotToLFull;
 	static State skipline;
 	static State obstacle;
+	static int lastSuccessLR = 0;
+	static int lastLR = 0;
+	static float[]escalator={10,90,90};
 	static {
 		online = new OnlineState();
-		rotToR = new RotToRState();rotToL = new RotToLState();
-		rotRToL = new RotRToLState();rotLToR = new RotLToRState();
+		rotToRFull = new RotToXFullState(-1);rotToLFull = new RotToXFullState(1);
 		skipline = new SkiplineState();
 	}
 	
@@ -30,9 +34,28 @@ public class Line {
 		return new StateExecutor(online);
 	}
 	
-	public static void exec(Bot bot) {
+	public static void exec(Bot bot, boolean debug) {
 		StateExecutor executor = Line.instantiate(bot);
+		executor.render = true;
+		executor.setHistorian(debug);
 		executor.exec(bot);
+		if(debug) {
+			String fn = "line_log.txt";
+			Path file = Paths.get(fn);
+			try {
+				StringBuilder outus = new StringBuilder();
+				for(int i=0; i<executor.getHistory().size(); i++) {
+					outus.append(executor.getHistory().get(i).getClass().getSimpleName()).append('\n');
+					if(i<executor.getTransitionHistory().size()) {
+						outus.append(((Object)executor.getTransitionHistory().get(i)).toString()).append('\n');
+					}
+				}
+				outus.append(executor.extraLogInfo);
+				Files.write(file, Arrays.asList(outus.toString()), StandardCharsets.US_ASCII);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 	
 	public static class ObstacleState extends State {
@@ -53,63 +76,42 @@ public class Line {
 			super(
 					new InfiniteDriveAction(LINE_CROSSING_DETECTION_SPEED),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_BLUE_I),
-							new FoundLineColor(LINE_WHITE_I).negate(),
-							new FoundLineColor(LINE_WHITE_I).negate(),
+							new Predicate.False<Bot>(),
+							brownWhite().and(new Predicate<Bot>() {
+								@Override
+								public Boolean exec(Bot t) {
+									return lastSuccessLR>=0;
+								}
+							}),
+							brownWhite().and(new Predicate<Bot>() {
+								@Override
+								public Boolean exec(Bot t) {
+									return lastSuccessLR<=0;
+								}
+							}),
 							new Touched()
 							)
 					);
 		}
 		@Override
 		public List<State> edgeTars() {
-			return CollUtil.listOf(State.END,rotToR,rotToL,obstacle);
+			return CollUtil.listOf(State.END,rotToLFull,rotToRFull,obstacle);
 		}
 	}
-	public static class RotToRState extends State {
-		public RotToRState() {
+	public static class RotToXFullState extends State {
+		public RotToXFullState(int flip) {
 			super(
-					new FiniteTurnAction(-90,LINE_TURN_CROSSING_DETECTION_SPEED),
+					sophisticatedRotSearch(escalator,flip),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
+							whiteBrown()
 							)
 					);
-		}
-
-		@Override
-		public List<State> edgeTars() {
-			return CollUtil.listOf(online);
-		}
-		@Override
-		public State next() {
-			return rotRToL;
-		}
-	}
-	public static class RotToLState extends State {
-		public RotToLState() {
-			super(
-					new FiniteTurnAction(90,LINE_TURN_CROSSING_DETECTION_SPEED),
-					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
-							)
-					);
-		}
-		@Override
-		public List<State> edgeTars() {
-			return CollUtil.listOf(online);
-		}
-		@Override
-		public State next() {
-			return rotLToR;
-		}
-	}
-	public static class RotRToLState extends State {
-		public RotRToLState() {
-			super(
-					new FiniteTurnAction(180,LINE_TURN_CROSSING_DETECTION_SPEED),
-					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
-							)
-					);
+			this.name = flip < 0 ? "RotToR" : "RotToL";
+			this.nextFinalizingAction = new Drive_Action((escalator[escalator.length-1]+DEGREE_EPSILON) / DIST_TO_DEG,DEFAULT_TURN_SPEED,-flip*90);
+			this.edgeFinalizingActions = new HashMap<>();
+			List<Action>actions = new ArrayList<>();
+			actions.add(SetLastSuccessToCurAction.ins);
+			this.edgeFinalizingActions.put(0, ActionUtil.concat(actions));	
 		}
 		@Override
 		public List<State> edgeTars() {
@@ -120,30 +122,29 @@ public class Line {
 			return skipline;
 		}
 	}
-	public static class RotLToRState extends State {
-		public RotLToRState() {
-			super(
-					new FiniteTurnAction(-180,LINE_TURN_CROSSING_DETECTION_SPEED),
-					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
-							)
-					);
+	public static Action sophisticatedRotSearch(float[]escalator, final float direction) {
+		List<Action> actions = new ArrayList<>();
+		float last = 0;
+		for(int i=0;i<escalator.length;i++) {
+			float esc = escalator[i];
+			final float flip = i%2==0 ? 1 : -1;
+			actions.add(new ImmediateAction() {
+				@Override
+				public void start(Bot bot) {
+					lastLR = (int)(flip * direction);
+				}});
+			float rot = flip*direction*90;
+			actions.add(new Drive_Action((last+esc) / DIST_TO_DEG,LINE_TURN_CROSSING_DETECTION_SPEED, rot));
+			last = esc;
 		}
-		@Override
-		public List<State> edgeTars() {
-			return CollUtil.listOf(online);
-		}
-		@Override
-		public State next() {
-			return skipline;
-		}
+		return ActionUtil.concat(actions);
 	}
 	public static class SkiplineState extends State {
 		public SkiplineState() {
 			super(
 					new JitterAction(SKIP_LINE_JITTER_DISTANCE, SKIP_LINE_JITTER_SPEED, SKIP_LINE_JITTER_ANGEL),
 					CollUtil.<Predicate<Bot>>listOf(
-							new FoundLineColor(LINE_WHITE_I)
+							whiteBrown()
 							)
 					);
 		}
@@ -151,5 +152,16 @@ public class Line {
 		public List<State> edgeTars() {
 			return CollUtil.listOf(online);
 		}
+	}
+	
+	public static class SetLastSuccessToCurAction extends ImmediateAction {
+
+		public static SetLastSuccessToCurAction ins = new SetLastSuccessToCurAction(); 
+		
+		@Override
+		public void start(Bot bot) {
+			lastSuccessLR = lastLR;
+		}
+		
 	}
 }

@@ -17,7 +17,7 @@ public class ActionUtil {
 		int i = 0;
 		List<Action> actions;
 		boolean stop;
-		Thread thread;
+		public Thread thread;
 		
 		public ConcatAction(List<Action> actions) {
 			this.actions = actions;
@@ -26,9 +26,10 @@ public class ActionUtil {
 		@Override
 		public void start(Bot bot) {
 			assert finished(bot);
+			stop = false;
 			thread = new _Thread(bot);
 			thread.setDaemon(true);
-			thread.run();
+			thread.start();
 		}
 
 		@Override
@@ -41,7 +42,7 @@ public class ActionUtil {
 
 		@Override
 		public boolean finished(Bot bot) {
-			return !thread.isAlive();
+			return thread == null || !thread.isAlive();
 		}
 
 		@Override
@@ -62,7 +63,14 @@ public class ActionUtil {
 				for(Action cur : actions) {
 					cur.reset();
 					cur.start(bot);
-					while(!cur.finished(bot));
+					while(!cur.finished(bot)) {
+						if(stop) {
+							cur.stop(bot);
+							break;
+						}
+					}
+					if(stop) break;
+					cur.stop(bot);
 				}
 			}
 			

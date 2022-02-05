@@ -19,9 +19,10 @@ public class Driver {
 	public static final float BACKWARD_DEGREES = 180;
 	public static final float FORWARD_DEGREES = 0;
 	
-	
+	public static final float DIST_TO_DEG = 5.5f;
 
 	public static final boolean BLOCKING_DEFAULT = true;
+	public static final boolean HARD_DEFAULT = false;
 
 	//scaling constants for turning degree and turning speed
 	public static final float turnDegFactorL = 5.88f;
@@ -38,7 +39,8 @@ public class Driver {
     public static final float driveFactor = 36 / turnDegFactorL;
     
     // saving US position (degrees). Assumption: start at 0 (forward facing)
-    // negative = left, positive = right
+    // negative = right, positive = left
+    private float usPosition = 0;
 
 	Bot bot;
 
@@ -57,11 +59,21 @@ public class Driver {
 		this.turn(deg, speed, BLOCKING_DEFAULT);
 	}
 	public void turn(float deg, float speed, boolean blocking){
-		Thread threadL = new RotateThread(this.bot.lMotor, deg*turnDegFactorL, speed*turnSpeedFactorL);
-		Thread threadR = new RotateThread(this.bot.rMotor, -deg*turnDegFactorR, speed*turnSpeedFactorR);
+		this.turn(deg, speed, blocking, HARD_DEFAULT);
+	}
+	public void turn(float deg, float speed, boolean blocking, boolean hard) {
+		Thread threadL, threadR;
+		if(hard) {
+			threadL = new RotateThread(this.bot.lMotor, deg*turnDegFactorL, speed*turnSpeedFactorL);
+			threadR = new RotateThread(this.bot.rMotor, -deg*turnDegFactorR, speed*turnSpeedFactorR);
+		}else {
+			threadL = new TachoRotateThread(this.bot.lMotor, deg*turnDegFactorL, speed*turnSpeedFactorL);
+			threadR = new TachoRotateThread(this.bot.rMotor, -deg*turnDegFactorR, speed*turnSpeedFactorR);
+		}
 		Thread[]threads = new Thread[]{
 				threadL, threadR,
 		};
+		Meth.shuffle(threads);
 		for(Thread t:threads)t.start();
 		if(blocking) {
 			try{
@@ -148,6 +160,9 @@ public class Driver {
 		this.drive_(distance, speed, rotation, BLOCKING_DEFAULT);
 	}
 	public void drive_(float distance, float speed, float rotation, boolean blocking) { 
+		this.drive_(distance, speed, rotation, BLOCKING_DEFAULT, HARD_DEFAULT);
+	}
+	public void drive_(float distance, float speed, float rotation, boolean blocking, boolean hard) {
 		distance *= driveFactor;
 		//offset to actual 1,1 position for motor 
 		rotation += 45;
@@ -155,11 +170,18 @@ public class Driver {
 		//scaled by sqrt(2) to get original 1,1 motor proportions instead of sqrt(2)^{-1},sqrt(2)^{-1}
 		float lscalar = Meth.sin(rad) * Meth.sqrtof2;
 		float rscalar = Meth.cos(rad) * Meth.sqrtof2;
-		Thread threadL = new RotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL);
-		Thread threadR = new RotateThread(this.bot.rMotor, rscalar*distance*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
+		Thread threadL, threadR;
+		if(hard) {
+			threadL = new RotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL);
+			threadR = new RotateThread(this.bot.rMotor, rscalar*distance*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
+		}else {
+			threadL = new TachoRotateThread(this.bot.lMotor, lscalar*distance*turnDegFactorL, lscalar*speed*turnSpeedFactorL);
+			threadR = new TachoRotateThread(this.bot.rMotor, rscalar*distance*turnDegFactorR, rscalar*speed*turnSpeedFactorR);
+		}
 		Thread[]threads = new Thread[]{
 				threadL, threadR,
 		};
+		Meth.shuffle(threads);
 		for(Thread t:threads)t.start();
 		if(blocking) {
 			try{
@@ -169,8 +191,48 @@ public class Driver {
 			};
 		}
 	}
+	static class TachoRotateThread extends Thread {
+		BaseRegulatedMotor motor;
+		float rad;
+		float speed;
+
+		public TachoRotateThread(BaseRegulatedMotor motor, float rad, float speed) {
+			this.motor = motor;
+			this.rad = rad;
+			this.speed = speed;
+		}
+		public void run(){
+			motor.resetTachoCount();
+			motor.getTachoCount();
+			motor.setSpeed(speed);
+			if(rad > 0) {
+				motor.forward();
+			}else {
+				motor.backward();
+			}
+			while(motor.getTachoCount()<rad);
+			motor.flt();
+		}
+	}
 	
 	
+	public float getUSPosition() {
+		return this.usPosition;
+	}
+	
+	public void setUSPosition(float goalPos, float speed, boolean blocking) {
+		assert goalPos >= -110f;
+		assert goalPos <= 110f;
+		
+		float difference = goalPos - usPosition;
+		
+		turnUS(difference, speed, blocking);
+		
+		usPosition = goalPos;
+		
+		if (usPosition > 90) usPosition = 90;
+		if (usPosition < -90) usPosition = -90;
+	}
 	
 	/*
 	 * turns ultrasonic(US) sensor
@@ -210,8 +272,34 @@ public class Driver {
 		this.bot.rMotor.forward();
 	}
 	public void driveStop() {
-		this.bot.lMotor.stop();
-		this.bot.rMotor.stop();
+		this.driveStop(HARD_DEFAULT);
+	}
+	public void driveStop(final boolean hard) {
+		
+		Thread[]threads = new Thread[] {
+				new DriveStopThread(this.bot.rMotor, hard),
+				new DriveStopThread(this.bot.lMotor, hard),
+		};
+		for(Thread t:threads)t.start();
+		try{
+			for(Thread t:threads)t.join();
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		};
+	}
+	static class DriveStopThread extends Thread {
+		BaseRegulatedMotor motor;
+		boolean hard;
+		public DriveStopThread(BaseRegulatedMotor motor, boolean hard) {
+			this.motor = motor;
+			this.hard = hard;
+		}
+		public void run() {
+			if (hard)
+				this.motor.stop();
+			else
+				this.motor.flt();
+		}
 	}
 	public boolean isMoving() {
 		return this.bot.lMotor.isMoving() || this.bot.rMotor.isMoving();

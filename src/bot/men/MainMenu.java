@@ -46,8 +46,8 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			// TODO Auto-generated method stub
-			
+			Screen.clear();
+			Line.exec(bot, true);
 		}},
     PUSH("Bully the box"){
 
@@ -101,9 +101,9 @@ public class MainMenu extends TextMenu {
 						break;
 					case 1:
 						if(Button.LEFT.isDown()) {
-							bot.driver.turn(90, 90);
+							bot.driver.turnUS(10, 1 * speedFactors[i]);
 						}else if(Button.RIGHT.isDown()) {
-							bot.driver.turn(-90, 90);
+							bot.driver.turnUS(-10, 1 * speedFactors[i]);
 						}else if(Button.UP.isDown()) {
 						}else if(Button.DOWN.isDown()) {
 						}
@@ -134,8 +134,12 @@ public class MainMenu extends TextMenu {
 					Screen.clear();
 					switch(mode) {
 						case 0:
-							
-							Screen.print(String.format("RGB: %s %n",Arrays.toString(bot.sensors.getRGB())));
+							float[]rgb=bot.sensors.getRGB();
+							Screen.prints("r:" + rgb[0]);
+							Screen.prints("g:" + rgb[1]);
+							Screen.prints("b:" + rgb[2]);
+							Screen.prints(colorClassify(rgb, LINE_WHITE, LINE_BROWN, LINE_BLUE) + "");
+							//Screen.prints(colorIDToString(bot.sensors.getColorID()));
 							break;
 						case 1:
 							Screen.print(String.format("I am being touched %s%n", bot.sensors.getTouch()));
