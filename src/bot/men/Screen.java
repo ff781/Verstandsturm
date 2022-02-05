@@ -68,8 +68,8 @@ public class Screen {
   }
   
   public static void beep() {
-	  Sound.playSample(new File("sonde.wav"));
-	  //Sound.beep();
+	  //Sound.playSample(new File("sonde.wav"));
+	  Sound.beepSequence();
   }
 
   public static void clear(){
