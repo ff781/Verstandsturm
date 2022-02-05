@@ -283,7 +283,7 @@ public class PushBox {
 		
 		// forward towards wall
 		bot.driver.drive_(20, speed, 0, false);
-		while (Button.ESCAPE.isUp() && !bot.sensors.isTouched()) {
+		while (Button.ESCAPE.isUp()) {
 			if (bot.sensors.isTouched()) break;
 		}
 		bot.driver.stop();
@@ -331,15 +331,30 @@ public class PushBox {
 		bot.driver.setUSPosition(90, 1, true);
 		
 		// drive forward
-		bot.driver.drive_(30, speed / 2, 0, false);
+		bot.driver.forward(speed, speed);
 		
-		while (Button.ESCAPE.isUp()) {
+		while (Button.ESCAPE.isUp() && distanceTraveled < 10f) {
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			Screen.print(distanceTraveled + "");
-			if (bot.sensors.getDistance() > 0.5f || (ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE, ParcourConstants.LINE_FAKE_BLUE) == 0 && distanceTraveled > 20)) {
+			if (bot.sensors.getDistance() > 0.5f) {
+				Screen.print("50");
+				bot.driver.stop();
+				
+				bot.driver.forward(-speed, -speed);
+				startTacho = bot.lMotor.getTachoCount();
+				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+				while (distanceTraveled > -0.8f && Button.ESCAPE.isUp()) {
+					distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+				}
 				stop();
-				bot.driver.drive_(3, speed / 2, -180, true);
-				Screen.beep();
+				//Screen.beep();
+				return true;
+			}
+			
+			if ((ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE, ParcourConstants.LINE_FAKE_BLUE) == 0 && distanceTraveled > 8)) {
+				stop();
+				Screen.print("COLOR");
+				//Screen.beep();
 				return true;
 			}
 			
