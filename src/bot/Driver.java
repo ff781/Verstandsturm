@@ -1,5 +1,6 @@
 package bot;
 
+import bot.men.Screen;
 import bot.sen.SensorThread;
 import lejos.hardware.Button;
 import lejos.hardware.lcd.LCD;
@@ -30,6 +31,9 @@ public class Driver {
     public static final float turnSpeedFactorR = 150;
 	public static final float turnDegFactorUSM = 2.69f;
     public static final float turnSpeedFactorUSM = 150;
+    
+    // saving US position (degrees). Assumption: start at 0 (forward facing)
+    private float usPosition = 0;
     
     //scaling constant for drive distance
     public static final float driveFactor = 36 / turnDegFactorL;
@@ -81,35 +85,45 @@ public class Driver {
 	}
 	
 	public void turnGyro(float deg, float speed){
-		this.bot.sensors.resetAngel();
+		this.bot.lMotor.resetTachoCount();
+		this.bot.rMotor.resetTachoCount();
+		float origin = this.bot.sensors.getAngel();
+		float tacho;
+		float tachoLimit = (500f) * (deg / 90f);
 		float dir;
 		if (deg >= 0f) {
 			turn(200, speed, false);
-			System.out.println("left");
+			tacho = this.bot.lMotor.getTachoCount();
 		}
 		else {
-			System.out.println("right");
 			turn(-200, speed, false);
+			tacho = this.bot.rMotor.getTachoCount();
 		}
-		dir = (deg * 0.81f);
-		System.out.println(dir);
+		dir = (deg * 0.84f);
 		while(Button.ESCAPE.isUp()) {
-			if (dir >= 0) {
-				if(this.bot.sensors.getAngel() >= dir) {
-					System.out.println("stop");
-					stop();
+			System.out.println(this.bot.rMotor.getTachoCount() - tacho);
+			if(this.bot.lMotor.getTachoCount() - tacho >= tachoLimit && dir >= 0) {
+				break;
+			}	
+			else if(dir >= 0) {
+				if(this.bot.sensors.getAngel() - origin >= dir) {
 					break;
 				}
 			}
-			else {
-				if(this.bot.sensors.getAngel() <= dir) {
-					System.out.println("stop");
-					stop();
+			else{
+				if(this.bot.sensors.getAngel() - origin <= dir) {
 					break;
 				}
 			}
 		}
-		LCD.clear();
+		if(deg >= 0f) {
+			turn(0, speed, true);
+		}
+		else {
+			turn(0, speed, true);
+		}
+
+		Screen.clear();
 	}
 	
 	
@@ -291,13 +305,6 @@ public class Driver {
 		return this.bot.lMotor.isMoving() || this.bot.rMotor.isMoving();
 	}
 	
-	public void forward() {
-		bot.lMotor.setSpeed(720);
-		bot.rMotor.setSpeed(720);
-		bot.lMotor.forward();
-		bot.rMotor.forward();
-	}
-	
 	public void forward(int lSpeed, int rSpeed) {
 		bot.lMotor.setSpeed(lSpeed);
 		bot.rMotor.setSpeed(rSpeed);
@@ -312,6 +319,13 @@ public class Driver {
 		} else {
 			bot.rMotor.backward();
 		}
+	}
+	
+	public void forward() {
+		bot.lMotor.setSpeed(720);
+		bot.rMotor.setSpeed(720);
+		bot.lMotor.forward();
+		bot.rMotor.forward();
 	}
 	
 	public void stop() {
@@ -334,6 +348,21 @@ public class Driver {
 			motor.setSpeed(speed);
 			motor.rotate((int)rad);
 		}
+	}
+	
+	public float getUSPosition() {
+		return this.usPosition;
+	}
+	
+	public void setUSPosition(float goalPos, float speed, boolean blocking) {
+		assert goalPos >= -110f;
+		assert goalPos <= 110f;
+		
+		float difference = goalPos - usPosition;
+		
+		turnUS(difference, speed, blocking);
+		
+		usPosition += difference;
 	}
 	
 	static class GyroThread extends Thread {

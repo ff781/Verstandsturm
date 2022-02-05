@@ -49,8 +49,6 @@ public class PushBox {
 			startTacho = bot.lMotor.getTachoCount();
 			bot.driver.drive(10, 2, 1, true);
 			
-			float dist = distanceOptimal;
-			
 			while (distanceTraveled < goalDistance) {
 				Screen.clear();
 				distanceTraveled = bot.lMotor.getTachoCount() - startTacho;
@@ -454,4 +452,22 @@ public class PushBox {
 			angle = this.getAdjustedAngle();
 		}
 	}
+	
+	public static float brownOrWhite(float[] rgb) {
+		  float[] brown = {0.02f, 0.0365f, 0.0039f};
+		  float[] white = {0.163f, 0.283f, 0.1313f};
+		  float threshold = 0.5f;
+		  
+		  float result = 0f;
+		  
+		  for (int i = 0; i < brown.length; i++) {
+			  result += (rgb[i] - brown[i]) / (white[i] - brown[i]);
+		  }
+		  
+		  if (result > 1.0f) result = 1.0f;
+		  if (result < 0.0f) result = 0.0f;
+		  
+		  return 1 - result;
+		  //return (result > threshold) ? 0.0f : 1.0f;
+	  }
 }
