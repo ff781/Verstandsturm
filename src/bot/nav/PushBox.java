@@ -275,16 +275,21 @@ public class PushBox {
 		
 		startTacho = bot.lMotor.getTachoCount();
 		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -0.9f && Button.ESCAPE.isUp()) {
+		while (distanceTraveled > -0.77f && Button.ESCAPE.isUp()) { // TODO adjust
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
 		bot.driver.stop();
 		
+		boolean touchedWall = false;
+		
 		// forward towards wall
 		bot.driver.drive_(20, speed, 0, false);
-		while (Button.ESCAPE.isUp()) {
-			if (bot.sensors.isTouched()) break;
+		while (Button.ESCAPE.isUp() && !touchedWall) {
+			if (bot.sensors.isTouched()) {
+				touchedWall = true;
+				break;
+			}
 		}
 		bot.driver.stop();
 		
@@ -301,7 +306,7 @@ public class PushBox {
 		
 		startTacho = bot.lMotor.getTachoCount();
 		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -1.5f && Button.ESCAPE.isUp() && !bot.sensors.isTouched()) {
+		while (distanceTraveled > -1.43f && Button.ESCAPE.isUp()) { // TODO adjust
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
