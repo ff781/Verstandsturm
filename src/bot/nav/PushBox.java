@@ -284,13 +284,18 @@ public class PushBox {
 		boolean touchedWall = false;
 		
 		// forward towards wall
-		bot.driver.drive_(20, speed, 0, false);
-		while (Button.ESCAPE.isUp() && !touchedWall) {
+		bot.driver.forward(speed, speed);
+		startTacho = bot.lMotor.getTachoCount();
+		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+		while (Button.ESCAPE.isUp() && !touchedWall && distanceTraveled < 5f) {
+			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
+			
 			if (bot.sensors.isTouched()) {
 				touchedWall = true;
 				break;
 			}
 		}
+		Screen.print("TOUCHED WALL");
 		bot.driver.stop();
 		
 		// drive back
