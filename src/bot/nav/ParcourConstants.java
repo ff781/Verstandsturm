@@ -1,10 +1,5 @@
 package bot.nav;
 
-import static bot.nav.ParcourConstants.LINE_BLUE;
-import static bot.nav.ParcourConstants.LINE_BROWN;
-import static bot.nav.ParcourConstants.LINE_FAKE_BLUE;
-import static bot.nav.ParcourConstants.LINE_WHITE;
-
 import bot.Bot;
 import bot.nav.act.FoundFirstLineColorFrom;
 import lejos.robotics.Color;

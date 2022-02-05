@@ -1,10 +1,13 @@
 package bot.nav;
 
-import bot.Bot;
+import java.util.concurrent.TimeUnit;
 
+import bot.Bot;
+import bot.men.Screen;
 import bot.sen.SensorThread;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 
 public class ColorSearch {
 	
@@ -25,24 +28,24 @@ public class ColorSearch {
 	 * Searches a closed room for 2 different colored squares, produces a beep sound when it finds the first one and stops the robots when it finds the second one.
 	 */
 	public void search() {
+		LCD.clear();
 		
 		int cnt = 0;
+		
 		
 		float[] rgbBack = this.bot.sensors.getRGB();
 		rBack = rgbBack[0];
 		gBack = rgbBack[1];
 		bBack = rgbBack[2];
 		
-		bot.driver.forward();;
+		bot.driver.forward();
 		
 		while(Button.ESCAPE.isUp()) {
-	
 			
 			//recognize different color
 			if(checkColor(bot.sensors)) {
 				if(!foundFirst) {
 					//first color found
-					this.bot.driver.stop();
 					Sound.beepSequenceUp();
 					float[] rgb = this.bot.sensors.getRGB();
 					rFirst = rgb[0];
@@ -50,10 +53,17 @@ public class ColorSearch {
 					bFirst = rgb[2];
 					foundFirst = true;
 					this.bot.driver.forward();
+					try {
+						TimeUnit.SECONDS.sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				else {
 					//second color found
 					this.bot.driver.stop();
+					Screen.clear();
 					Sound.beepSequence();
 					break;
 				}
@@ -61,23 +71,40 @@ public class ColorSearch {
 			
 			//Robot touches wall
 			if(checkTouch(bot.sensors)) {
-				//Check sides first
-				if (cnt <= 3) {
-					this.bot.driver.turnUS(90f, 2f);;
+				//on the first wall turn to the left
+				if (cnt == 0) {
+					this.bot.driver.drive(2f, 4f, -1);
+					this.bot.driver.turnGyro(90f, 1f);
+					this.bot.driver.drive(8f, 4f, -1);
 					this.bot.driver.forward();
-					cnt++;
+					cnt += 2;		
 				}
 				//then start checking inside the square
 				else {
-					this.bot.driver.turnUS(90f, 2f);
-					this.bot.driver.drive(2f, 2f, 1);
-					this.bot.driver.turnUS(90f, 2f);
-					this.bot.driver.forward();
+					if(cnt % 2 == 0) {
+						this.bot.driver.drive(4f, 4f, -1);
+						this.bot.driver.turnGyro(90f, 2f);
+						this.bot.driver.drive(8f, 4f, 1);
+						this.bot.driver.turnGyro(90f, 2f);
+						this.bot.driver.drive(15f, 4f, -1);
+						this.bot.driver.forward();
+						cnt++;
+					}
+					else {
+						this.bot.driver.drive(4f, 4f, -1);
+						this.bot.driver.turnGyro(-90f, 2f);
+						this.bot.driver.drive(8f, 4f, 1);
+						this.bot.driver.turnGyro(-90f, 2f);
+						this.bot.driver.drive(15f, 4f, -1);
+						this.bot.driver.forward();
+						cnt++;
+					}
 				}
 			}
-		
 		}
-		bot.driver.stop();
+		this.bot.driver.stop();
+		Screen.clear();
+		Screen.print("Both colors found!");
 	}
 	
 	/**
@@ -90,12 +117,12 @@ public class ColorSearch {
 		g = rgb[1];
 		b = rgb[2];
 		
-		if((r - rBack) + (g- gBack) + (b - bBack) > 0.05 ) {
+		if(Math.abs(r - rBack) + Math.abs(g- gBack) + Math.abs(b - bBack) > 0.05) {
 			if(!foundFirst) {
 				return true;
 			}
 			else {
-				if((r - rFirst) + (g- gFirst) + (b - bFirst) > 0.05 ) {
+				if(Math.abs(r - rFirst) + Math.abs(g- gFirst) + Math.abs(b - bFirst) > 0.45) {
 					return true;
 				}
 			}
@@ -107,10 +134,18 @@ public class ColorSearch {
 	 * @param sensor sensor to get values from.
 	 * @return true if touch sensor is signaled, false else.
 	 */
-	private boolean checkTouch(SensorThread sensor) {
+	public static boolean checkTouch(SensorThread sensor) {
 		if(sensor.getTouch() == 1) {
 			return true;
 		}
 		return false;
 	}
+	
+	private boolean checkUs(SensorThread sensor) {
+		if( sensor.getDistance() <= 0.1f) {
+			return true;
+		}
+		return false;
+	}
+	
 }
