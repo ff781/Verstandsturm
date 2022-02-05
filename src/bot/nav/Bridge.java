@@ -1,5 +1,12 @@
 package bot.nav;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+
 import bot.Bot;
 import bot.men.Screen;
 import bot.sen.SensorThread;
@@ -7,6 +14,12 @@ import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import util.func.Function2;
+import util.state.Action;
+import util.state.NoSEAction;
+import util.state.State;
+import util.state.StateExecutor;
+import util.state.ThreadBoundAction;
 
 public class Bridge {
 	
@@ -26,44 +39,87 @@ public class Bridge {
 		this.bot = bot;
 	}
 	
+	static State start;
+	static {
+		start = new StartState();
+	}
+	
 	/**
 	 * Drives up and down the ramp
 	 */
-	
-	public void execHC() {
-		this.bot.driver.drive(98, 4, 1, true);
-		
-		this.bot.driver.turnGyro(91, 2);
-		
-		this.bot.driver.drive(125, 4, 1, true);
-		
-		this.bot.driver.turnGyro(91, 2);
-		
-		this.bot.driver.drive(98, 4, 1, true);	
-		
-		/******************
-		this.bot.driver.driveForever(3);
-		
-		while(Button.ENTER.isUp()) {
-			
-			if(checkCliff(bot.sensors)) {
-				break;
-			}
-			
-			if(checkBlue(bot.sensors)) {
-				this.bot.driver.drive(10, 2, 1, true);
-				break;
-			}
+	public static class StartState extends State {
+
+		public StartState() {
+			super(new ThreadBoundAction(
+					new Function2<Bot, boolean[], Thread>(){
+
+						@Override
+						public Thread exec(final Bot s, final boolean[] t) {
+							return new Thread() {
+								public void run() {
+									s.driver.drive( 98, 4, 1, true );
+									if(t[0]) return;
+									
+									s.driver.turnGyro(91, 2);
+									if(t[0]) return;
+									
+									s.driver.drive(125, 4, 1, true);
+									if(t[0]) return;
+									
+									s.driver.turnGyro(91, 2);
+									if(t[0]) return;
+									
+									s.driver.drive(98, 4, 1, true);	
+									
+									/******************
+									this.bot.driver.driveForever(3);
+									
+									while(Button.ENTER.isUp()) {
+										
+										if(checkCliff(bot.sensors)) {
+											break;
+										}
+										
+										if(checkBlue(bot.sensors)) {
+											this.bot.driver.drive(10, 2, 1, true);
+											break;
+										}
+									}
+									
+									this.bot.driver.stop();
+									**************************/
+									Screen.clear();
+								}
+							};
+						}}
+					));
+			// TODO Auto-generated constructor stub
 		}
 		
-		this.bot.driver.stop();
-		**************************/
-		Screen.clear();
 	}
 	
-	public void exec() {
-
-		execHC();
+	public static void exec(Bot bot, boolean debug) {
+		StateExecutor executor = new StateExecutor(start);
+		executor.render = true;
+		executor.setHistorian(debug);
+		executor.exec(bot);
+		if(debug) {
+			String fn = "bridge_log.txt";
+			Path file = Paths.get(fn);
+			try {
+				StringBuilder outus = new StringBuilder();
+				for(int i=0; i<executor.getHistory().size(); i++) {
+					outus.append(executor.getHistory().get(i).getName()).append('\n');
+					if(i<executor.getTransitionHistory().size()) {
+						outus.append(((Object)executor.getTransitionHistory().get(i)).toString()).append('\n');
+					}
+				}
+				outus.append(executor.extraLogInfo);
+				Files.write(file, Arrays.asList(outus.toString()), StandardCharsets.US_ASCII);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 	
 	

@@ -65,13 +65,14 @@ public class MainMenu extends TextMenu {
 
 		@Override
 		void exec(Bot bot) {
-			new Bridge(bot).execHC();
+			Bridge.exec(bot, false);
 			
 		}},
     COLOR("Find color speckles and purr"){
 
 		@Override
 		void exec(Bot bot) {
+			Screen.clear();
 			new ColorSearch(bot).search();
 			
 		}},

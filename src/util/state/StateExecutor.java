@@ -127,8 +127,8 @@ public class StateExecutor extends ThreadBoundAction implements Action {
 							extraLogInfo.append(cca.thread.isAlive()?1:0).append('\n');
 						}
 					}
-					if(cur.next() != null) {
-						next = cur.next();
+					next = cur.next();
+					if(next != null) {
 						transitionByEnd = true;
 						finalizingAction = cur.nextFinalizingAction();
 						for(int ri=0;ri<renderBuffer.length;ri++)renderBuffer[ri]=null;

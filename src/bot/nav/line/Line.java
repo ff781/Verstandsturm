@@ -253,7 +253,6 @@ public class Line {
 		
 		@Override
 		public State next() {
-			Screen.beep();
 			return State.END;
 		}
 
