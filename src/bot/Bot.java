@@ -43,6 +43,7 @@ public class Bot {
 	//public MovePilot pilot;
 	public DifferentialPilot pilot;
 	public Driver driver;
+	public DriverOld driverOld;
 
 	public Bot() {
 		this.lMotor = new EV3LargeRegulatedMotor(MotorPort.A);
@@ -88,6 +89,7 @@ public class Bot {
 	
 		//robot steering mechanisms
 		this.driver = new Driver(this);
+		this.driverOld = new DriverOld(this);
 //		Wheel lWheel = WheeledChassis.modelWheel(this.lMotor, WHEEL_DIAMETER).offset(- TRACK_WIDTH * .5);
 //		Wheel rWheel = WheeledChassis.modelWheel(this.rMotor, WHEEL_DIAMETER).offset(TRACK_WIDTH * .5);
 //		Wheel[]wheels = new Wheel[] {lWheel, rWheel,};
