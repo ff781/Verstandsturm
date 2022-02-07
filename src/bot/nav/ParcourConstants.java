@@ -36,13 +36,13 @@ public class ParcourConstants {
 	}
 	
 	//#obstacle constants
-	public static final float OBSTACLE1_BACKOFF_DISTANCE = 7.5f;
+	public static final float OBSTACLE1_BACKOFF_DISTANCE = 9f;
 	
 	public static final float OBSTACLE_ROT_DEGREES = 45.f;
 	public static final float OBSTACLE_SLIDEWAYS_DISTANCE = 27.f;
 
-	public static final float OBSTACLE_TO_2ND_CRASH_DISTANCE = 34.f;
-	public static final float OBSTACLE_ENDSPURT_DISTANCE = 7f;
+	public static final float OBSTACLE_TO_2ND_CRASH_DISTANCE = 36.f;
+	public static final float OBSTACLE_ENDSPURT_DISTANCE = 0f;
 	
 	//#speed
 	

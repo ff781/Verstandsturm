@@ -52,24 +52,29 @@ public class Bridge {
 		public StartState() {
 			super(new ThreadBoundAction(
 					new Function2<Bot, boolean[], Thread>(){
-
+						float gyroTurn = 92.1f;
+						float gyrosPeed = 1.69f;
+						float driveSpeed = 3.f;
 						@Override
 						public Thread exec(final Bot s, final boolean[] t) {
 							return new Thread() {
 								public void run() {
-									s.driver.drive( 98, 4, 1, true );
+									s.driver.drive( 98, driveSpeed, 1, true );
+									if(t[0]) return;
+			
+									s.driver.turnGyro(gyroTurn, gyrosPeed);
 									if(t[0]) return;
 									
-									s.driver.turnGyro(91, 2); // vorher 91
+									s.driver.drive(122, driveSpeed, 1, true);
+									if(t[0]) return;
+			
+									s.driver.turnGyro(gyroTurn, gyrosPeed);
 									if(t[0]) return;
 									
-									s.driver.drive(125, 4, 1, true);
+									s.driver.drive(98, driveSpeed, 1, true);	
 									if(t[0]) return;
 									
-									s.driver.turnGyro(91, 2); // vorher 91
-									if(t[0]) return;
-									
-									s.driver.drive(98, 4, 1, true);	
+									Screen.beep();
 									
 									/******************
 									this.bot.driver.driveForever(3);
