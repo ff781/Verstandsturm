@@ -9,7 +9,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 
 public class PushBox {
-	public static float BAT = 0.8f;
+	public static float BAT = 1.5f;
 	
 	private Bot bot;
 
