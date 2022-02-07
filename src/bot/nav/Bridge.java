@@ -60,13 +60,13 @@ public class Bridge {
 									s.driver.drive( 98, 4, 1, true );
 									if(t[0]) return;
 									
-									s.driver.turnGyro(93, 2); // vorher 91
+									s.driver.turnGyro(91, 2); // vorher 91
 									if(t[0]) return;
 									
 									s.driver.drive(125, 4, 1, true);
 									if(t[0]) return;
 									
-									s.driver.turnGyro(95, 2); // vorher 91
+									s.driver.turnGyro(91, 2); // vorher 91
 									if(t[0]) return;
 									
 									s.driver.drive(98, 4, 1, true);	
