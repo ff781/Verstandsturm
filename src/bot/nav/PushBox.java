@@ -9,6 +9,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 
 public class PushBox {
+	public static float BAT = 0.8f;
 	
 	private Bot bot;
 
@@ -51,7 +52,7 @@ public class PushBox {
 			
 			float dist = distanceOptimal;
 			
-			while (distanceTraveled < goalDistance) {
+			while (distanceTraveled * BAT < goalDistance) {
 				Screen.clear();
 				distanceTraveled = bot.lMotor.getTachoCount() - startTacho;
 				
@@ -73,7 +74,7 @@ public class PushBox {
 				dist = bot.sensors.getDistance();
 				Screen.print(dist + "");
 				
-				boolean closeToTarget = distanceTraveled > goalDistance - 480;
+				boolean closeToTarget = distanceTraveled * BAT > goalDistance - 480;
 				
 				if (dist < distanceLower) {
 					int correction2 = correction;
@@ -176,7 +177,7 @@ public class PushBox {
 				bot.driver.forward(speed / 2, speed / 2);
 				startTacho = bot.lMotor.getTachoCount();
 				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-				while (distanceTraveled < 5f && Button.ESCAPE.isUp()) {
+				while (distanceTraveled * BAT < 5f && Button.ESCAPE.isUp()) {
 					distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 					
 					// ... until box is touched
@@ -205,7 +206,7 @@ public class PushBox {
 			bot.driver.setUSPosition(-90, 1, false);
 			bot.driver.forward(speed, speed);
 			
-			while (distanceTraveled < goalDistance) {
+			while (distanceTraveled * BAT < goalDistance) {
 				Screen.clear();
 				distanceTraveled = bot.lMotor.getTachoCount() - startTacho;
 				
@@ -266,7 +267,7 @@ public class PushBox {
 		
 		float startTacho = bot.lMotor.getTachoCount();
 		float distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -1f && Button.ESCAPE.isUp()) {
+		while (distanceTraveled * BAT > -1f && Button.ESCAPE.isUp()) {
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
@@ -275,7 +276,7 @@ public class PushBox {
 		
 		startTacho = bot.lMotor.getTachoCount();
 		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -0.77f && Button.ESCAPE.isUp()) { // TODO adjust
+		while (distanceTraveled * BAT > -0.77f && Button.ESCAPE.isUp()) { // TODO adjust
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
@@ -287,7 +288,7 @@ public class PushBox {
 		bot.driver.forward(speed, speed);
 		startTacho = bot.lMotor.getTachoCount();
 		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (Button.ESCAPE.isUp() && !touchedWall && distanceTraveled < 5f) {
+		while (Button.ESCAPE.isUp() && !touchedWall && distanceTraveled * BAT < 5f) {
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			
 			if (bot.sensors.isTouched()) {
@@ -302,7 +303,7 @@ public class PushBox {
 		bot.driver.forward(-speed, -speed);
 		startTacho = bot.lMotor.getTachoCount();
 		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -1.6f && Button.ESCAPE.isUp()) {
+		while (distanceTraveled * BAT > -1.6f && Button.ESCAPE.isUp()) {
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
@@ -311,7 +312,7 @@ public class PushBox {
 		
 		startTacho = bot.lMotor.getTachoCount();
 		distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-		while (distanceTraveled > -1.43f && Button.ESCAPE.isUp()) { // TODO adjust
+		while (distanceTraveled * BAT > -1.43f && Button.ESCAPE.isUp()) { // TODO adjust
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 		}
 		
@@ -343,7 +344,7 @@ public class PushBox {
 		// drive forward
 		bot.driver.forward(speed, speed);
 		
-		while (Button.ESCAPE.isUp() && distanceTraveled < 10f) {
+		while (Button.ESCAPE.isUp() && distanceTraveled * BAT < 10f) {
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			Screen.print(distanceTraveled + "");
 			if (bot.sensors.getDistance() > 0.5f) {
@@ -353,7 +354,7 @@ public class PushBox {
 				bot.driver.forward(-speed, -speed);
 				startTacho = bot.lMotor.getTachoCount();
 				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-				while (distanceTraveled > -0.8f && Button.ESCAPE.isUp()) {
+				while (distanceTraveled * BAT > -0.8f && Button.ESCAPE.isUp()) {
 					distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 				}
 				stop();
@@ -361,7 +362,7 @@ public class PushBox {
 				return true;
 			}
 			
-			if ((ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE, ParcourConstants.LINE_FAKE_BLUE) == 0 && distanceTraveled > 8)) {
+			if ((ParcourConstants.colorClassify(bot.sensors.getRGB(), ParcourConstants.LINE_BLUE, ParcourConstants.LINE_BROWN, ParcourConstants.LINE_WHITE, ParcourConstants.LINE_FAKE_BLUE) == 0 && distanceTraveled * BAT > 8)) {
 				stop();
 				Screen.print("COLOR");
 				//Screen.beep();
@@ -381,7 +382,7 @@ public class PushBox {
 			
 			startTacho = bot.lMotor.getTachoCount();
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-			while (distanceTraveled > -1.5f && Button.ESCAPE.isUp()) {
+			while (distanceTraveled * BAT > -1.5f && Button.ESCAPE.isUp()) {
 				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			}
 			
@@ -390,7 +391,7 @@ public class PushBox {
 			
 			startTacho = bot.lMotor.getTachoCount();
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-			while (distanceTraveled > -1.7f && Button.ESCAPE.isUp()) {
+			while (distanceTraveled * BAT > -1.7f && Button.ESCAPE.isUp()) {
 				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			}
 			
@@ -399,7 +400,7 @@ public class PushBox {
 			
 			startTacho = bot.lMotor.getTachoCount();
 			distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
-			while (distanceTraveled > -2.5f && Button.ESCAPE.isUp()) {
+			while (distanceTraveled * BAT > -2.5f && Button.ESCAPE.isUp()) {
 				distanceTraveled = (bot.lMotor.getTachoCount() - startTacho) / 360;
 			}
 			
@@ -412,7 +413,7 @@ public class PushBox {
 			
 			startTacho = bot.rMotor.getTachoCount();
 			distanceTraveled = (bot.rMotor.getTachoCount() - startTacho) / 360;
-			while (distanceTraveled > -1.7f && Button.ESCAPE.isUp()) {
+			while (distanceTraveled * BAT > -1.7f && Button.ESCAPE.isUp()) {
 				distanceTraveled = (bot.rMotor.getTachoCount() - startTacho) / 360;
 			}
 						
